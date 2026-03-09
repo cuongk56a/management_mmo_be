@@ -1,0 +1,52 @@
+services:
+  app:
+    build: .
+    ports:
+      - "2803:2803"
+    depends_on:
+      - mongo
+      - redis
+    # environment:
+    #   - NODE_ENV=${NODE_ENV}
+    #   - PORT=${PORT}
+    #   - REDIS_HOST=${REDIS_HOST}
+    #   - REDIS_PORT=${REDIS_PORT}
+    #   - REDIS_PASSWORD=${REDIS_PASSWORD}
+    #   - REDIS_URL=${REDIS_URI}
+    #   - MONGODB_URL=${MONGODB_URL}
+    #   - TABLE_PREFIX=${TABLE_PREFIX}
+    #   - JWT_SECRET=${JWT_SECRET}
+    #   - JWT_ACCESS_EXPIRATION_MINUTES=${JWT_ACCESS_EXPIRATION_MINUTES}
+    #   - JWT_REFRESH_EXPIRATION_DAYS=${JWT_REFRESH_EXPIRATION_DAYS}
+    #   - JWT_RESET_PASSWORD_EXPIRATION_MINUTES=${JWT_RESET_PASSWORD_EXPIRATION_MINUTES}
+    #   - JWT_VERIFY_EMAIL_EXPIRATION_MINUTES=${JWT_VERIFY_EMAIL_EXPIRATION_MINUTES}
+    #   - JWT_SET_IMAGE_DAY=${JWT_SET_IMAGE_DAY}
+    #   - EMAIL=${EMAIL}
+    #   - PASS=${PASS}
+    #   - SERVICE_FILE_URI=${SERVICE_FILE_URI}
+    #   - cloud_name=${cloud_name}
+    #   - cloud_api_key=${cloud_api_key}
+    #   - cloud_api_secret=${cloud_api_secret}
+    #   - TIMEZONE=${TIMEZONE}
+    #   - VALIDATION_FORMAT_DATE=${VALIDATION_FORMAT_DATE}
+    #   - VALIDATION_FORMAT_DATETIME=${VALIDATION_FORMAT_DATETIME}
+    env_file: 
+      - .env
+    volumes:
+      - .:/usr/src/app
+    command: yarn dev
+
+  mongo:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+
+volumes:
+  mongo-data:
