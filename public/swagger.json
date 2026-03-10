@@ -455,7 +455,7 @@
 						}
 					}
 				},
-				"description": "Xem chi tiết báo cáo 1 tháng định sẵn. Sẽ tự động trích xuất / tổng kết mới nhất\nGửi param YYYY-MM",
+				"description": "Xem chi tiết báo cáo 1 tháng định sẵn. Sẽ tự động trích xuất / tổng kết mới nhất\r\nGửi param YYYY-MM",
 				"tags": [
 					"Reports"
 				],
@@ -723,7 +723,7 @@
 						}
 					}
 				},
-				"description": "Xem danh sách đơn hàng\nStaff chỉ thấy đơn hàng của khách hàng do mình quản lý",
+				"description": "Xem danh sách đơn hàng\r\nStaff chỉ thấy đơn hàng của khách hàng do mình quản lý",
 				"tags": [
 					"Orders"
 				],
@@ -1049,7 +1049,7 @@
 						}
 					}
 				},
-				"description": "Xem danh sách khách hàng\nStaff chỉ thấy khách hàng của mình",
+				"description": "Xem danh sách khách hàng\r\nStaff chỉ thấy khách hàng của mình",
 				"tags": [
 					"Customers"
 				],

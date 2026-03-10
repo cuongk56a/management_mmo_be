@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import userRoute from '../modules/user/user.route';
-import authRoute from '../modules/auth/auth.route';
+import { userRoute } from '../modules/user/user.route';
+import { authRoute } from '../modules/auth/auth.route';
 // Import các module mới tạo của MMO
 import employeeRoute from '../modules/employee/employee.route';
 import customerRoute from '../modules/customer/customer.route';

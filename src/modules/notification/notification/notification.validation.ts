@@ -1,6 +1,5 @@
 import Joi from 'joi';
 import {customValidations} from '../../../utils/validations/custom.validation';
-import { TABLE_ORGANIZATION } from '../../organization/organization.configs';
 
 const createOne = {
   body: Joi.object().keys({

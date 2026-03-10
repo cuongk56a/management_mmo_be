@@ -3,7 +3,7 @@ import {TABLE_USER} from '../modules/user/user.configs';
 import { getRandomInt } from '../utils/RamdomString';
 import {UserModel} from '../modules/user/user.model';
 import {fakeImages} from './images/images';
-import { OrganizationModel } from '../modules/organization/organization.model';
+// import { OrganizationModel } from '../modules/organization/organization.model';
 // import { BrandModel } from '../modules/brand/brand.model';
 // import { CategoryModel } from '../modules/category/category.model';
 // import { ProductModel } from '../modules/product/product/product.model';
@@ -18,7 +18,7 @@ const unitId = '63f6c9c699a2dd615fd22688';
 
 const clean = async () => {
   await Promise.all([
-    OrganizationModel.deleteMany(),
+    // OrganizationModel.deleteMany(),
     UserModel.deleteMany(),
     // CategoryModel.deleteMany(),
     // BrandModel.deleteMany(),
@@ -29,15 +29,15 @@ const clean = async () => {
 
 const fake = async () => {
   const fakeOrg = async () => {
-    await OrganizationModel.create({
-      _id: companyId,
-      CODE: 'FSOFT',
-      name: 'FIT Shop',
-      hotline: '096131906',
-      thumbnail: fakeImages.compImg,
-      description: faker.lorem.words(30),
-      createdById: adminCId,
-    });
+    // await OrganizationModel.create({
+    //   _id: companyId,
+    //   CODE: 'FSOFT',
+    //   name: 'FIT Shop',
+    //   hotline: '096131906',
+    //   thumbnail: fakeImages.compImg,
+    //   description: faker.lorem.words(30),
+    //   createdById: adminCId,
+    // });
   };
 
   const fakeAdmin = async () => {

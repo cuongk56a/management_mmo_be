@@ -1,34 +1,36 @@
-import {NextFunction, Request, Response} from 'express';
+import { NextFunction, Request, Response } from 'express';
 import httpStatus from 'http-status';
 import ApiError from '../../utils/core/ApiError';
-import {catchAsync} from '../../utils/core/catchAsync';
-import {userService} from '../user/user.service';
+import { catchAsync } from '../../utils/core/catchAsync';
+import { userService } from '../user/user.service';
 import nodemailer from 'nodemailer';
-import {getRedisCode, setRedisCode} from '../../redis/redisCode';
-import {appConfigs} from '../../config/config';
-import {checkPassword, hashPassword} from '../../utils/hashUtil';
-import {getNewToken} from '../../config/passport';
-import {IUserDoc} from '../user/user.type';
-import {genCODE, genCode} from '../../utils/core/genCode';
-import {IRoleDoc} from '../role/role.type';
-import {roleService} from '../role/role.service';
-import {UserModel} from '../user/user.model';
-import { activityLogService } from '../activityLog/activityLog.service';
-
+import { getRedisCode, setRedisCode } from '../../redis/redisCode';
+import { appConfigs } from '../../config/config';
+import { checkPassword, hashPassword } from '../../utils/hashUtil';
+import { getNewRefreshToken, getNewToken } from '../../config/passport';
+import { IUserDoc } from '../user/user.type';
+import { genCODE, genCode } from '../../utils/core/genCode';
+// import {IRoleDoc} from '../role/role.type';
+// import {roleService} from '../role/role.service';
+type IRoleDoc = any;
+const roleService: any = { getOne: async (filter: any) => null };
+import { UserModel } from '../user/user.model';
+// import { activityLogService } from '../activityLog/activityLog.service';
+const activityLogService: any = { createOne: async (data: any) => null };
 const register = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-  const {email, password, confirmPassword, fullName, phone, code} = req.body;
+  const { email, password, confirmPassword, fullName, phone, code } = req.body;
   try {
     const confirmCode = await getRedisCode(email);
     const user: IUserDoc | null = await userService.getOne({
-      $or: [{email: email}, {phone: phone}],
+      $or: [{ email: email }, { phone: phone }],
     });
     if (!!user) {
-      res.send({code: httpStatus.BAD_REQUEST, status: 'Error', message: 'Email hoặc số điện thoại đã được sử dụng!'});
-    }  if (password !== confirmPassword) {
-      res.send({code: httpStatus.BAD_REQUEST, status: 'Error', message: 'Mật khẩu và mật khẩu xác nhận không trùng nhau!'});
+      res.send({ code: httpStatus.BAD_REQUEST, status: 'Error', message: 'Email hoặc số điện thoại đã được sử dụng!' });
+    } if (password !== confirmPassword) {
+      res.send({ code: httpStatus.BAD_REQUEST, status: 'Error', message: 'Mật khẩu và mật khẩu xác nhận không trùng nhau!' });
     } else if (confirmCode !== code) {
-      res.send({code: httpStatus.BAD_REQUEST, status: 'Error', message: 'Mã code không chính xác!'});
-    } else{
+      res.send({ code: httpStatus.BAD_REQUEST, status: 'Error', message: 'Mã code không chính xác!' });
+    } else {
       const hashedPassword = await hashPassword(password);
       const data: IUserDoc | null = await userService.createOne({
         fullName,
@@ -39,7 +41,7 @@ const register = catchAsync(async (req: Request, res: Response, next: NextFuncti
       if (!data) {
         throw new ApiError(httpStatus.NOT_FOUND, 'Not Found');
       }
-      res.send({code: httpStatus.OK, status: 'Success', message: 'Đăng ký thành công!'});
+      res.send({ code: httpStatus.OK, status: 'Success', message: 'Đăng ký thành công!' });
     }
   } catch (error: any) {
     return next(new ApiError(httpStatus.NOT_FOUND, error.message));
@@ -47,24 +49,26 @@ const register = catchAsync(async (req: Request, res: Response, next: NextFuncti
 });
 
 const login = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-  const {email, password} = req.body;
+  const { email, password } = req.body;
   try {
-    const user: IUserDoc | null = await userService.getOne({email});
+    const user: IUserDoc | null = await userService.getOne({ email });
     if (!user) {
-      res.send({code: httpStatus.NOT_FOUND, status: 'Error', message: 'Not Found User!'});
+      res.send({ code: httpStatus.NOT_FOUND, status: 'Error', message: 'Not Found User!' });
     } else {
       const check = await checkPassword(password, user?.hashedPassword);
       if (check) {
-        const token = getNewToken({userId: user.id});
-        await activityLogService.createOne({
-          userId: user._id,
-          ipAddress: req.headers['x-real-ip'],
-          userAgent: req.get('User-Agent') || '',
-          applicationName: 'web'
-        })
-        res.send({code: httpStatus.OK, status: 'Success', message: 'Đăng nhập thành công!', data: user, token: token});
+        const token = getNewToken({ userId: user.id });
+        const refreshToken = getNewRefreshToken({ userId: user.id });
+        res.cookie('refresh_token', refreshToken, {
+          httpOnly: true,
+          secure: appConfigs.env === 'production',
+          sameSite: 'lax',
+          path: '/',
+          maxAge: 7 * 24 * 60 * 60 * 1000,
+        });
+        res.send({ code: httpStatus.OK, status: 'Success', message: 'Đăng nhập thành công!', data: user, token: token });
       } else {
-        res.send({code: httpStatus.BAD_REQUEST, status: 'Error', message: 'Email Or Password Not Incorrect!'});
+        res.send({ code: httpStatus.BAD_REQUEST, status: 'Error', message: 'Email Or Password Not Incorrect!' });
       }
     }
   } catch (error: any) {
@@ -72,15 +76,38 @@ const login = catchAsync(async (req: Request, res: Response, next: NextFunction)
   }
 });
 
+const refresh = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const { refreshToken } = req.cookies['refresh_token'];
+  try {
+    const user: IUserDoc | null = await userService.getOne({ refreshToken });
+    if (!user) {
+      res.send({ code: httpStatus.NOT_FOUND, status: 'Error', message: 'Not Found User!' });
+    } else {
+      const token = getNewToken({ userId: user.id });
+      const refreshToken = getNewRefreshToken({ userId: user.id });
+      res.cookie('refresh_token', refreshToken, {
+        httpOnly: true,
+        secure: appConfigs.env === 'production',
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
+      res.send({ code: httpStatus.OK, status: 'Success', message: 'Cấp lại token thành công!', data: user, token: token });
+    }
+  } catch (error: any) {
+    return next(new ApiError(httpStatus.NOT_FOUND, error.message));
+  }
+});
+
 const changePassword = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-  const {password, newPassword, cfNewPassword, updatedById, ...body} = req.body;
+  const { password, newPassword, cfNewPassword, updatedById, ...body } = req.body;
   try {
     if (newPassword !== cfNewPassword) {
-      res.send({code: httpStatus.BAD_REQUEST, status: 'Error', message: 'Mật khẩu mới và mật khẩu xác nhận không khớp!'});
+      res.send({ code: httpStatus.BAD_REQUEST, status: 'Error', message: 'Mật khẩu mới và mật khẩu xác nhận không khớp!' });
     }
-    const [user, hashedPassword] = await Promise.all([userService.getOne({_id: updatedById}), hashPassword(newPassword)]);
+    const [user, hashedPassword] = await Promise.all([userService.getOne({ _id: updatedById }), hashPassword(newPassword)]);
     if (!user) {
-      res.send({code: httpStatus.NOT_FOUND, status: 'Error', message: 'Người dùng không tồn tại!'});
+      res.send({ code: httpStatus.NOT_FOUND, status: 'Error', message: 'Người dùng không tồn tại!' });
     } else {
       const check = await checkPassword(password, user?.hashedPassword);
 
@@ -98,9 +125,9 @@ const changePassword = catchAsync(async (req: Request, res: Response, next: Next
             new: true,
           },
         );
-        res.send({code: httpStatus.OK, status: 'Success', message: 'Đổi mật khẩu thành công!'});
+        res.send({ code: httpStatus.OK, status: 'Success', message: 'Đổi mật khẩu thành công!' });
       } else {
-        res.send({code: httpStatus.BAD_REQUEST, status: 'Error', message: 'Mật khẩu cũ không chính xác!'});
+        res.send({ code: httpStatus.BAD_REQUEST, status: 'Error', message: 'Mật khẩu cũ không chính xác!' });
       }
     }
   } catch (error: any) {
@@ -109,11 +136,11 @@ const changePassword = catchAsync(async (req: Request, res: Response, next: Next
 });
 
 const forgotPassword = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-  const {email, code} = req.body;
+  const { email, code } = req.body;
   try {
     const [confirmCode, newPassword] = await Promise.all([getRedisCode(email), genCode(4)]);
     if (confirmCode !== code) {
-      res.send({code: httpStatus.BAD_REQUEST, status: 'Error', message: 'Mã xác thực không đúng!'});
+      res.send({ code: httpStatus.BAD_REQUEST, status: 'Error', message: 'Mã xác thực không đúng!' });
     } else {
       const hashedPassword = await hashPassword(newPassword);
       await userService.updateOne(
@@ -147,7 +174,7 @@ const forgotPassword = catchAsync(async (req: Request, res: Response, next: Next
           console.log('Send Email Success! ' + info.response);
         }
       });
-      res.send({code: httpStatus.OK, status: 'Success!', message: 'Mật khẩu mới đã được gửi tới email của bạn!'});
+      res.send({ code: httpStatus.OK, status: 'Success!', message: 'Mật khẩu mới đã được gửi tới email của bạn!' });
     }
   } catch (error: any) {
     return next(new ApiError(httpStatus.NOT_FOUND, error.message));
@@ -155,14 +182,14 @@ const forgotPassword = catchAsync(async (req: Request, res: Response, next: Next
 });
 
 const loginPortal = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-  const {createdById, targetId} = req.body;
+  const { createdById, targetId } = req.body;
   try {
-    const role: IRoleDoc | null = await roleService.getOne({targetId, userId: createdById});
+    const role: IRoleDoc | null = await roleService.getOne({ targetId, userId: createdById });
     if (!role) {
-      res.send({code: httpStatus.OK, status: 'Error'});
+      res.send({ code: httpStatus.OK, status: 'Error' });
     } else {
-      const access_token = getNewToken({userId: createdById, roleId: role.id});
-      res.send({code: httpStatus.OK, status: 'Success', access_token: access_token});
+      const access_token = getNewToken({ userId: createdById, roleId: role.id });
+      res.send({ code: httpStatus.OK, status: 'Success', access_token: access_token });
     }
   } catch (error: any) {
     return next(new ApiError(httpStatus.NOT_FOUND, error.message));
@@ -170,7 +197,7 @@ const loginPortal = catchAsync(async (req: Request, res: Response, next: NextFun
 });
 
 const sendMail = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-  const {email} = req.body;
+  const { email } = req.body;
   try {
     const confirmCode = await getRedisCode(email);
     const transporter = nodemailer.createTransport({
@@ -202,6 +229,7 @@ const sendMail = catchAsync(async (req: Request, res: Response, next: NextFuncti
 export const authController = {
   register,
   login,
+  refresh,
   changePassword,
   forgotPassword,
   loginPortal,

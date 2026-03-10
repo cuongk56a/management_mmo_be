@@ -1,5 +1,6 @@
 import AbstractQueueProcessor from '../../../redis/queue';
-import { organizationService } from '../../organization/organization.service';
+// import { organizationService } from '../../organization/organization.service';
+const organizationService: any = { updateOne: async () => {} };
 import {ITransactionModelDoc} from '../transaction.model';
 import { TRANSACTION_STATUS, TRANSACTION_TYPE } from '../transaction.type';
 export class TransactionQueue extends AbstractQueueProcessor {

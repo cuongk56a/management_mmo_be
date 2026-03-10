@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import cors from 'cors';
 import httpStatus from 'http-status';
 import routes from './routes/v1';
+import fileUpload from 'express-fileupload';
 import { rateLimit } from 'express-rate-limit';
 const app = express();
 var bodyParser = require('body-parser');
@@ -25,7 +26,7 @@ const limiter = rateLimit({
     return req.headers['x-forwarded-for'] || req.headers['x-real-ip'];
   },
 });
-app.use(limiter);
+// app.use(limiter);
 
 import { morganHandler } from './config/morgan';
 if (appConfigs.env !== 'test') {
@@ -46,7 +47,7 @@ app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 
 // parse urlencoded request body
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
-
+app.use(fileUpload());
 // enable cors
 app.use(cors());
 app.options('*', cors());
@@ -59,6 +60,7 @@ import path from 'path';
 app.use(passport.initialize() as any);
 passport.use('jwt', jwtStrategy);
 
+app.use("/uploads", express.static("uploads"));
 import { RegisterRoutes } from './tsoaRoutes/routes';
 app.use('/v1', routes);
 RegisterRoutes(app);

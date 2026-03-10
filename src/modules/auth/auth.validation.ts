@@ -1,5 +1,5 @@
 import Joi from 'joi';
-import {customValidations} from '../../utils/validations/custom.validation';
+import { customValidations } from '../../utils/validations/custom.validation';
 
 const register = {
   body: Joi.object().keys({

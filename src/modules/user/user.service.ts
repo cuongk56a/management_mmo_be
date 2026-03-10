@@ -14,7 +14,7 @@ const updateOne = async (filter: any, body: any, options?: QueryOptions): Promis
     },
     body,
     {new: true, ...options},
-  );
+  ) as any;
 };
 
 const deleteOne = async (filter: any): Promise<IUserDoc | null> => {
@@ -22,7 +22,7 @@ const deleteOne = async (filter: any): Promise<IUserDoc | null> => {
 };
 
 const getOne = async (filter: any, options?: any): Promise<IUserDoc | null> => {
-  return UserModel.findOne(filter, undefined, options);
+  return UserModel.findOne(filter, undefined, options) as any;
 };
 
 const getList = async (filter: any, options?: any): Promise<IUserDoc[]> => {
@@ -32,7 +32,7 @@ const getList = async (filter: any, options?: any): Promise<IUserDoc[]> => {
       deletedById: {$exists: false},
     },
     {sort: {createdAt: -1}, ...options},
-  );
+  ) as any;
 };
 
 const getAll = async (filter: any, options?: any): Promise<IUserDoc[]> => {
@@ -43,7 +43,7 @@ const getAll = async (filter: any, options?: any): Promise<IUserDoc[]> => {
     },
     undefined,
     {sort: {createdAt: -1}, ...options},
-  );
+  ) as any;
 };
 
 export const userService = {

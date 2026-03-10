@@ -14,7 +14,7 @@ const updateOne = async (filter: any, body: any, options?: QueryOptions): Promis
     },
     body,
     {new: true, ...options},
-  );
+  ) as any;
 };
 
 const deleteOne = async (filter: any): Promise<ITransactionDoc | null> => {
@@ -22,7 +22,7 @@ const deleteOne = async (filter: any): Promise<ITransactionDoc | null> => {
 };
 
 const getOne = async (filter: any, options?: any): Promise<ITransactionDoc | null> => {
-  return TransactionModel.findOne(filter, undefined, options);
+  return TransactionModel.findOne(filter, undefined, options) as any;
 };
 
 const getList = async (filter: any, options?: any): Promise<ITransactionDoc[]> => {
@@ -32,7 +32,7 @@ const getList = async (filter: any, options?: any): Promise<ITransactionDoc[]> =
       deletedById: {$exists: false},
     },
     {sort: {createdAt: -1}, ...options},
-  );
+  ) as any;
 };
 
 const getAll = async (filter: any, options?: any): Promise<ITransactionDoc[]> => {
@@ -43,7 +43,7 @@ const getAll = async (filter: any, options?: any): Promise<ITransactionDoc[]> =>
     },
     undefined,
     {sort: {createdAt: -1}, ...options},
-  );
+  ) as any;
 };
 
 export const transactionService = {

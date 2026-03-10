@@ -4,8 +4,10 @@ import { IDocModel } from '../../utils/types/entityTypes';
 import {TABLE_TRANSACTION} from './transaction.configs';
 import {paginate, toJSON} from '../../utils/plugins'
 import { TABLE_USER } from '../user/user.configs';
-import { TABLE_ORGANIZATION } from '../organization/organization.configs';
-import { TABLE_SHOP } from '../shop/shop.configs';
+// import { TABLE_ORGANIZATION } from '../organization/organization.configs';
+// import { TABLE_SHOP } from '../shop/shop.configs';
+const TABLE_ORGANIZATION = 'organization';
+const TABLE_SHOP = 'shop';
 import { createNewQueue } from '../../redis/queue';
 import { TABLE_ORDER } from '../order/order.configs';
 

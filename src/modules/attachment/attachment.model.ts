@@ -4,7 +4,7 @@ import { IDocModel } from '../../utils/types/entityTypes';
 import {TABLE_ATTACHMENT} from './attachment.configs';
 import {paginate, toJSON} from '../../utils/plugins'
 import { TABLE_USER } from '../user/user.configs';
-import { TABLE_ORGANIZATION } from '../organization/organization.configs';
+
 
 export interface IAttachmentModelDoc extends IAttachmentDoc {}
 interface IAttachmentModel extends IDocModel<IAttachmentModelDoc> {}

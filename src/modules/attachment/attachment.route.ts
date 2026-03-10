@@ -9,7 +9,7 @@ const router = express.Router()
 
 router
     .route('/image')
-    .post(validate(attachmentValidation.createOrUpdateMany), upload.uploadImage.array('images', 10),attachmentController.createOrUpdateMany);
+    .post(validate(attachmentValidation.createOrUpdateMany), upload.uploadImage.array('images', 10) as any,attachmentController.createOrUpdateMany);
 
 router
     .route('/image/:fileName')
@@ -17,7 +17,7 @@ router
 
 router
     .route('/excel')
-    .post(validate(attachmentValidation.createExcel), upload.uploadExcel.single('excel'),attachmentController.createExcel);
+    .post(validate(attachmentValidation.createExcel), upload.uploadExcel.single('excel') as any,attachmentController.createExcel);
 
 router
     .route('/excel/:fileName')

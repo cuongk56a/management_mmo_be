@@ -15,6 +15,5 @@ export interface IUserDoc extends IDoc {
   avatar: string;
   birthday: string;
   gender: UserGender;
-  addressId: mongoose.Schema.Types.ObjectId;
   isAdmin: boolean;
 }

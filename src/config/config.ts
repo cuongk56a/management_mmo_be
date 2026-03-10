@@ -88,5 +88,4 @@ export const appConfigs = {
   services: {
     svFile: envVars.SERVICE_FILE_URI,
   },
-  fls_url: envVars.FLS_URL
 };

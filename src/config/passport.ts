@@ -1,5 +1,5 @@
-import {Strategy as JwtStrategy, ExtractJwt} from 'passport-jwt';
-import {appConfigs} from './config';
+import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
+import { appConfigs } from './config';
 var jwt = require('jsonwebtoken');
 
 const jwtOptions = {
@@ -19,5 +19,10 @@ export const jwtStrategy = new JwtStrategy(jwtOptions, jwtVerify);
 
 export const getNewToken = (payload: any) => {
   const expiresIn = appConfigs.jwt.accessExpirationSeconds;
-  return jwt.sign(payload, appConfigs.jwt.secret, {expiresIn: 86400});
+  return jwt.sign(payload, appConfigs.jwt.secret, { expiresIn: expiresIn });
+};
+
+export const getNewRefreshToken = (payload: any) => {
+  const expiresIn = appConfigs.jwt.refreshExpirationDays;
+  return jwt.sign(payload, appConfigs.jwt.secret, { expiresIn: expiresIn });
 };

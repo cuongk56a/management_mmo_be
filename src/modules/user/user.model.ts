@@ -3,9 +3,7 @@ import { IUserDoc, UserGender } from './user.type';
 import { IDocModel } from '../../utils/types/entityTypes';
 import { TABLE_USER } from './user.configs';
 import { paginate, toJSON } from '../../utils/plugins';
-import { TABLE_ADDRESS } from '../address/address.configs';
 import { getImageUriFromFilename } from '../../utils/core/stringUtil';
-import { TABLE_ROLE } from '../role/role.configs';
 
 export interface IUserModelDoc extends IUserDoc { }
 interface IUserModel extends IDocModel<IUserModelDoc> { }
@@ -42,10 +40,6 @@ const userSchema = new mongoose.Schema<IUserModelDoc>(
       type: String,
       enum: UserGender,
     },
-    addressId: {
-      type: mongoose.Schema.Types.ObjectId,
-      required: false,
-    },
     isAdmin: {
       type: Boolean,
       default: false,
@@ -78,52 +72,36 @@ userSchema.virtual('avatarUri').get(function () {
 userSchema.plugin(toJSON);
 userSchema.plugin(paginate);
 
-userSchema.virtual('address', {
-  ref: TABLE_ADDRESS,
-  localField: 'addressId', 
-  foreignField: '_id',
-  justOne: true,
-  match: {deletedById: {$exists: false}},
-});
-
-userSchema.virtual('role', {
-  ref: TABLE_ROLE,
-  localField: '_id', 
-  foreignField: 'userId',
-  justOne: false,
-  match: {deletedById: {$exists: false}},
-});
-
-const populateArr = ({hasAddress, hasRole}: {hasAddress: boolean, hasRole: boolean}) => {
+const populateArr = ({ hasAddress, hasRole }: { hasAddress: boolean, hasRole: boolean }) => {
   let pA: any[] = [];
   return pA
     .concat(
       !!hasAddress
         ? {
-            path: 'address',
-            options: {hasLocation: true}
-          }
+          path: 'address',
+          options: { hasLocation: true }
+        }
         : [],
     )
     .concat(
       !!hasRole
         ? {
-            path: 'role',
-          }
+          path: 'role',
+        }
         : [],
     );
 };
 
 function preFind(next: any) {
-  this.populate(populateArr({...this.getOptions(), ...this._conditions}));
+  this.populate(populateArr({ ...this.getOptions(), ...this._conditions }));
   next();
 }
 
 userSchema.pre('findOne', preFind);
 userSchema.pre('find', preFind);
 
-userSchema.index({ phone: 1 });
-userSchema.index({ email: 1 });
+// userSchema.index({ phone: 1 });
+// userSchema.index({ email: 1 });
 userSchema.index({ fullName: 'text' });
 
 /**

@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import {IDoc} from '../../utils/types/entityTypes';
-import { IOrganizationDoc } from '../organization/organization.type';
+type IOrganizationDoc = any;
 
 export enum ORDER_STATUS{
   PENDING = 'PENDING',

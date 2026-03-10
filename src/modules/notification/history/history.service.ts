@@ -14,7 +14,7 @@ const updateOne = async (filter: any, body: any, options?: QueryOptions): Promis
     },
     body,
     {new: true, ...options},
-  );
+  ) as any;
 };
 
 const deleteOne = async (filter: any): Promise<IHistoryDoc | null> => {
@@ -22,7 +22,7 @@ const deleteOne = async (filter: any): Promise<IHistoryDoc | null> => {
 };
 
 const getOne = async (filter: any, options?: any): Promise<IHistoryDoc | null> => {
-  return HistoryModel.findOne(filter, undefined, options);
+  return HistoryModel.findOne(filter, undefined, options) as any;
 };
 
 const getList = async (filter: any, options?: any): Promise<IHistoryDoc[]> => {
@@ -32,7 +32,7 @@ const getList = async (filter: any, options?: any): Promise<IHistoryDoc[]> => {
       deletedById: {$exists: false},
     },
     {sort: {createdAt: -1}, ...options},
-  );
+  ) as any;
 };
 
 const getAll = async (filter: any, options?: any): Promise<IHistoryDoc[]> => {
@@ -43,7 +43,7 @@ const getAll = async (filter: any, options?: any): Promise<IHistoryDoc[]> => {
     },
     undefined,
     {sort: {createdAt: -1}, ...options},
-  );
+  ) as any;
 };
 
 const getCount = async (filter: any, options?: any): Promise<Number> => {

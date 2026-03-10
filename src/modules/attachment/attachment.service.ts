@@ -14,7 +14,7 @@ const updateOne = async (filter: any, body: any, options?: QueryOptions): Promis
     },
     body,
     { new: true, ...options },
-  );
+  ) as any;
 };
 
 const deleteOne = async (filter: any): Promise<IAttachmentDoc | null> => {
@@ -22,7 +22,7 @@ const deleteOne = async (filter: any): Promise<IAttachmentDoc | null> => {
 };
 
 const getOne = async (filter: any, options?: any): Promise<IAttachmentDoc | null> => {
-  return AttachmentModel.findOne(filter, undefined, options);
+  return AttachmentModel.findOne(filter, undefined, options) as any;
 };
 
 const getList = async (filter: any, options?: any, sortOptions?: any): Promise<IAttachmentDoc[]> => {
@@ -32,7 +32,7 @@ const getList = async (filter: any, options?: any, sortOptions?: any): Promise<I
       deletedById: { $exists: false },
     },
     { sort: { ...sortOptions, createdAt: -1 }, ...options },
-  );
+  ) as any;
 };
 
 const getAll = async (filter: any, options?: any, sortOptions?: any): Promise<IAttachmentDoc[]> => {
@@ -43,7 +43,7 @@ const getAll = async (filter: any, options?: any, sortOptions?: any): Promise<IA
     },
     undefined,
     { sort: { ...sortOptions, createdAt: -1 }, ...options },
-  );
+  ) as any;
 };
 
 export const attachmentService = {

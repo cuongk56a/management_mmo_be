@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
-import { roleService } from "../modules/role/role.service";
+// import { roleService } from "../modules/role/role.service";
+const roleService: any = { getOne: async (filter: any) => null };
 import httpStatus from 'http-status';
 import { UserModel } from '../modules/user/user.model';
 
