@@ -8,9 +8,6 @@ import http from 'http';
 import { Socket } from 'socket.io';
 import cron from 'node-cron';
 import { TransactionQueue } from './modules/transaction/queue/TransactionQueue';
-import { PushOrderQueue } from './modules/flashShipping/queue/pushOrderQueue';
-import { loginCronJob } from './modules/flashShipping/flashShipping.util';
-import { orderService } from './modules/order/order.service';
 import SocketQueue from './socket/queue/SocketQueue';
 import { NotificationQueue } from './modules/notification/history/queue/pushNotifiQueue';
 
@@ -41,40 +38,11 @@ onConnetCallback(() => {
       server.listen(appConfigs.port, async () => {
         logger.info(`Listening to port ${appConfigs.port}`);
 
-        // await loginCronJob();
-
-        // cron.schedule('0 */4 * * *', async () => {
-        //   try {
-        //     await loginCronJob();
-        //     console.log('Login Cron-job Successfully!');
-        //   } catch (error) {
-        //     console.error('Error updating product quantities:', error);
-        //   }
-        // }, {
-        //   scheduled: true,
-        //   timezone: 'Asia/Ho_Chi_Minh'
-        // });
-
-        // cron.schedule('*/30 * * * *', async () => {
-        //   try {
-        //     await orderService.statusFSCronJob();
-        //     console.log('Update Order Cron-job Successfully!');
-        //   } catch (error) {
-        //     console.error('Error updating product quantities:', error);
-        //   }
-        // }, {
-        //   scheduled: true,
-        //   timezone: 'Asia/Ho_Chi_Minh'
-        // });
-
-        const {startSocketModule} = require('../src/socket/index');
+        const { startSocketModule } = require('../src/socket/index');
         startSocketModule(undefined, server, (socket: Socket, next: any) => next(), undefined);
 
         const onTransQUE = new TransactionQueue('TransactionQueue');
         onTransQUE.initQueue();
-
-        const onPushOrderQUE = new PushOrderQueue('PushOrderQueue');
-        onPushOrderQUE.initQueue();
 
         const onNotifiQUE = new NotificationQueue('NotificationQueue');
         onNotifiQUE.initQueue();

@@ -1,150 +1,57 @@
-import mongoose, {QueryOptions} from 'mongoose';
-import {OrderModel} from './order.model';
-import {IOrderDoc, IOrderSummary, ORDER_STATUS} from './order.type';
-import {orderDetailFS} from '../flashShipping/flashShipping.util';
-import {appConfigs} from '../../config/config';
-import moment from 'moment-timezone';
+import mongoose from 'mongoose';
+import { OrderModel } from './order.model';
+import { CustomerModel } from '../customer/customer.model';
+import { EmployeeModel } from '../employee/employee.model';
+import { ProductModel } from '../product/product.model';
+import ApiError from '../../utils/core/ApiError';
+import httpStatus from 'http-status';
 
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+export class OrderService {
+  static async createOrder(orderBody: any) {
+    const session = await mongoose.startSession();
+    session.startTransaction();
 
-const createOne = async (body: any): Promise<IOrderDoc | null> => {
-  return OrderModel.create(body);
-};
+    try {
+      // 1. Kiểm tra tồn tại Data
+      const product = await ProductModel.findById(orderBody.productId).session(session);
+      if (!product) throw new ApiError(httpStatus.NOT_FOUND, 'Sản phẩm không tồn tại');
 
-const updateOne = async (filter: any, body: any, options?: QueryOptions): Promise<IOrderDoc | null> => {
-  return OrderModel.findOneAndUpdate(
-    {
-      deletedById: {$exists: false},
-      ...filter,
-    },
-    body,
-    {new: true, ...options},
-  );
-};
+      const customer = await CustomerModel.findById(orderBody.customerId).session(session);
+      if (!customer) throw new ApiError(httpStatus.NOT_FOUND, 'Khách hàng không tồn tại');
 
-const deleteOne = async (filter: any): Promise<IOrderDoc | null> => {
-  return OrderModel.findOneAndDelete(filter);
-};
+      const staff = await EmployeeModel.findById(customer.staffId).session(session);
+      if (!staff) throw new ApiError(httpStatus.NOT_FOUND, 'Nhân viên phụ trách không tồn tại');
 
-const getOne = async (filter: any, options?: any): Promise<IOrderDoc | null> => {
-  return OrderModel.findOne(filter, undefined, options);
-};
+      // 2. Logic tính hoa hồng (price * commissionRate)
+      const commission = orderBody.price * staff.commissionRate;
 
-const getList = async (filter: any, options?: any): Promise<IOrderDoc[]> => {
-  return OrderModel.paginate(
-    {
-      ...filter,
-      deletedById: {$exists: false},
-    },
-    {sort: {createdAt: -1}, ...options},
-  );
-};
+      // 3. Tạo Order
+      const order = await OrderModel.create([{
+        customerId: customer._id,
+        productId: product._id,
+        staffId: staff._id,
+        price: orderBody.price,
+        currency: orderBody.currency || 'USD',
+        commission,
+        status: 'completed'
+      }], { session });
 
-const getAll = async (filter: any, options?: any): Promise<IOrderDoc[]> => {
-  return OrderModel.find(
-    {
-      deletedById: {$exists: false},
-      ...filter,
-    },
-    undefined,
-    {sort: {createdAt: -1}, ...options},
-  );
-};
+      // 4. Update thông số tổng của customer: totalSpent
+      customer.totalSpent += orderBody.price;
+      await customer.save({ session });
 
-const statusFSCronJob = async () => {
-  try {
-    const orders = await OrderModel.find(
-      {
-        CODE: {$exists: true},
-        status: {$nin: [ORDER_STATUS.REJECT_REQUESTED, ORDER_STATUS.REJECT, ORDER_STATUS.CANCELLED, ORDER_STATUS.COMPLETED]},
-        deletedAt: {$exists: false},
-      },
-      undefined,
-      {hasTarget: true},
-    );
-
-    for (const order of orders) {
-      try {
-        if (!!order?.target?.accessTokenFlashShip && order?.target?.enabledFlashShip) {
-          const oDetailFS = await orderDetailFS(order.CODE, order?.target?.accessTokenFlashShip);
-          if (oDetailFS?.data?.status == 'REJECT_REQUESTED') {
-            await OrderModel.updateOne(
-              {_id: order._id},
-              {status: ORDER_STATUS.REJECT_REQUESTED, trackingIdFLS: oDetailFS?.data?.trackingNumber},
-            );
-          }
-          if (oDetailFS?.data?.status == 'WAIT_TO_SHIP') {
-            await OrderModel.updateOne(
-              {_id: order._id},
-              {status: ORDER_STATUS.SHIPPING, trackingIdFLS: oDetailFS?.data?.trackingNumber},
-            );
-          }
-          if (oDetailFS?.data?.status == 'HOLD') {
-            await OrderModel.updateOne(
-              {_id: order._id},
-              {status: ORDER_STATUS.HOLD, trackingIdFLS: oDetailFS?.data?.trackingNumber},
-            );
-          }
-          if (oDetailFS?.data?.status == 'COMPLETED') {
-            await OrderModel.updateOne(
-              {_id: order._id},
-              {status: ORDER_STATUS.COMPLETED, trackingIdFLS: oDetailFS?.data?.trackingNumber},
-            );
-          }
-        }
-      } catch (orderError) {
-        console.error(`Error processing order ${order._id}:`, orderError);
-      }
-      await delay(1000);
+      await session.commitTransaction();
+      return order[0];
+    } catch (error) {
+      await session.abortTransaction();
+      throw error;
+    } finally {
+      session.endSession();
     }
-  } catch (error) {
-    console.error('Error in statusFSCronJob:', error);
   }
-};
 
-const getSummary = async (filter: any, options?: any): Promise<IOrderSummary[] | null> => {
-  const {startAt, targetId, shopId} = filter;
-
-  const start = moment(`00:00:00 ${startAt}`, appConfigs.validation.formatDateTime, appConfigs.timeZone).unix();
-  return OrderModel.aggregate([
-    {
-      $match: {
-        ...(!!targetId ? {targetId: new mongoose.Types.ObjectId(targetId)} : undefined),
-        ...(!!shopId ? {shopId: new mongoose.Types.ObjectId(shopId)} : undefined),
-        ...(!!startAt
-          ? {
-              createdTiktokTimestamp: {
-                $gte: start,
-              },
-            }
-          : undefined),
-        deletedAt: {$exists: false},
-      },
-    },
-    {
-      $group: {
-        _id: {
-          $dateToString: {format: '%d-%m-%Y', date: '$createdAt'},
-        },
-        ordersCount: {$sum: 1},
-      },
-    },
-    {
-      $sort: {_id: 1}, // sort by date
-    },
-    {
-      $project: {_id: 0, date: '$_id', ordersCount: 1},
-    },
-  ]);
-};
-
-export const orderService = {
-  createOne,
-  updateOne,
-  deleteOne,
-  getOne,
-  getAll,
-  getList,
-  statusFSCronJob,
-  getSummary,
-};
+  static async getOrders(query: any, staffIdFilter?: string) {
+    const filter = staffIdFilter ? { staffId: staffIdFilter, ...query } : query;
+    return OrderModel.find(filter).populate('customerId').populate('productId');
+  }
+}

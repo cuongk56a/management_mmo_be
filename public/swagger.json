@@ -1,0 +1,1236 @@
+{
+	"openapi": "3.0.0",
+	"components": {
+		"examples": {},
+		"headers": {},
+		"parameters": {},
+		"requestBodies": {},
+		"responses": {},
+		"schemas": {
+			"DepositBody": {
+				"properties": {
+					"amount": {
+						"type": "number",
+						"format": "double"
+					},
+					"currency": {
+						"type": "string",
+						"enum": [
+							"USD",
+							"VND"
+						]
+					},
+					"method": {
+						"type": "string",
+						"enum": [
+							"bank",
+							"admin"
+						]
+					}
+				},
+				"required": [
+					"amount",
+					"method"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"WithdrawBody": {
+				"properties": {
+					"amount": {
+						"type": "number",
+						"format": "double"
+					},
+					"currency": {
+						"type": "string",
+						"enum": [
+							"USD",
+							"VND"
+						]
+					}
+				},
+				"required": [
+					"amount"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ProductCreateBody": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"type": {
+						"type": "string",
+						"enum": [
+							"external",
+							"internal"
+						]
+					},
+					"costPrice": {
+						"type": "number",
+						"format": "double"
+					},
+					"sellPrice": {
+						"type": "number",
+						"format": "double"
+					},
+					"description": {
+						"type": "string"
+					},
+					"supplier": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"name",
+					"type",
+					"costPrice",
+					"sellPrice"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ProductUpdateBody": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"type": {
+						"type": "string",
+						"enum": [
+							"external",
+							"internal"
+						]
+					},
+					"costPrice": {
+						"type": "number",
+						"format": "double"
+					},
+					"sellPrice": {
+						"type": "number",
+						"format": "double"
+					},
+					"description": {
+						"type": "string"
+					},
+					"supplier": {
+						"type": "string"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"OrderCreateBody": {
+				"properties": {
+					"customerId": {
+						"type": "string"
+					},
+					"productId": {
+						"type": "string"
+					},
+					"price": {
+						"type": "number",
+						"format": "double"
+					},
+					"currency": {
+						"type": "string",
+						"enum": [
+							"USD",
+							"VND"
+						]
+					}
+				},
+				"required": [
+					"customerId",
+					"productId",
+					"price"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ExpenseCreateBody": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"amount": {
+						"type": "number",
+						"format": "double"
+					},
+					"currency": {
+						"type": "string",
+						"enum": [
+							"USD",
+							"VND"
+						]
+					},
+					"source": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"name",
+					"amount",
+					"source"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"EmployeeCreateBody": {
+				"properties": {
+					"userId": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"email": {
+						"type": "string"
+					},
+					"role": {
+						"type": "string",
+						"enum": [
+							"ADMIN",
+							"STAFF"
+						]
+					},
+					"commissionRate": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"userId",
+					"name",
+					"email",
+					"role"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"EmployeeUpdateBody": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"email": {
+						"type": "string"
+					},
+					"role": {
+						"type": "string",
+						"enum": [
+							"ADMIN",
+							"STAFF"
+						]
+					},
+					"commissionRate": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"CustomerCreateBody": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"email": {
+						"type": "string"
+					},
+					"phone": {
+						"type": "string"
+					},
+					"staffId": {
+						"type": "string"
+					},
+					"leadSourceId": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"name",
+					"email",
+					"phone"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"CustomerUpdateBody": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"email": {
+						"type": "string"
+					},
+					"phone": {
+						"type": "string"
+					},
+					"staffId": {
+						"type": "string"
+					},
+					"leadSourceId": {
+						"type": "string"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			}
+		},
+		"securitySchemes": {
+			"jwt": {
+				"type": "http",
+				"scheme": "bearer",
+				"bearerFormat": "JWT"
+			}
+		}
+	},
+	"info": {
+		"title": "tc-ecommerce",
+		"version": "1.0.0",
+		"license": {
+			"name": "ISC"
+		},
+		"contact": {}
+	},
+	"paths": {
+		"/wallet": {
+			"get": {
+				"operationId": "GetWallet",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"description": "Xem ví cá nhân",
+				"tags": [
+					"Wallet"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/wallet/deposit": {
+			"post": {
+				"operationId": "CreateDeposit",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"description": "KH Yêu cầu nạp tiền (hoặc Admin cấp tiền)",
+				"tags": [
+					"Wallet"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/DepositBody"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/wallet/deposit-history": {
+			"get": {
+				"operationId": "GetDepositHistory",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"description": "Xem lịch sử nạp tiền",
+				"tags": [
+					"Wallet"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/wallet/withdraw": {
+			"post": {
+				"operationId": "CreateWithdraw",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"description": "Yêu cầu rút tiền khỏi ví",
+				"tags": [
+					"Wallet"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/WithdrawBody"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/wallet/withdraw-history": {
+			"get": {
+				"operationId": "GetWithdrawHistory",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"description": "Xem lịch sử rút tiền",
+				"tags": [
+					"Wallet"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/reports/monthly": {
+			"get": {
+				"operationId": "GetMonthlyReport",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"description": "Xem chi tiết báo cáo 1 tháng định sẵn. Sẽ tự động trích xuất / tổng kết mới nhất\nGửi param YYYY-MM",
+				"tags": [
+					"Reports"
+				],
+				"security": [
+					{
+						"jwt": [
+							"ADMIN"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "month",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/reports": {
+			"get": {
+				"operationId": "GetMonthlyReports",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"description": "Xem lịch sử các báo cáo (dạng list các tháng cũ)",
+				"tags": [
+					"Reports"
+				],
+				"security": [
+					{
+						"jwt": [
+							"ADMIN"
+						]
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/products": {
+			"get": {
+				"operationId": "GetProducts",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"data": {},
+										"results": {
+											"type": "number",
+											"format": "double"
+										},
+										"status": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"data",
+										"status"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"description": "Xem danh sách tất cả sản phẩm",
+				"tags": [
+					"Products"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "type",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "supplier",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"post": {
+				"operationId": "CreateProduct",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"description": "Tạo sản phẩm mới (chỉ Admin)",
+				"tags": [
+					"Products"
+				],
+				"security": [
+					{
+						"jwt": [
+							"ADMIN"
+						]
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ProductCreateBody"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/products/{id}": {
+			"get": {
+				"operationId": "GetProduct",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"description": "Xem chi tiết sản phẩm",
+				"tags": [
+					"Products"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"put": {
+				"operationId": "UpdateProduct",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"description": "Sửa sản phẩm (chỉ Admin)",
+				"tags": [
+					"Products"
+				],
+				"security": [
+					{
+						"jwt": [
+							"ADMIN"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ProductUpdateBody"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "DeleteProduct",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"description": "Xoá sản phẩm (chỉ Admin)",
+				"tags": [
+					"Products"
+				],
+				"security": [
+					{
+						"jwt": [
+							"ADMIN"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/orders": {
+			"get": {
+				"operationId": "GetOrders",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"description": "Xem danh sách đơn hàng\nStaff chỉ thấy đơn hàng của khách hàng do mình quản lý",
+				"tags": [
+					"Orders"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "status",
+						"required": false,
+						"schema": {
+							"type": "string",
+							"enum": [
+								"pending",
+								"completed",
+								"cancelled"
+							]
+						}
+					}
+				]
+			},
+			"post": {
+				"operationId": "CreateOrder",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"description": "Tạo đơn hàng mới",
+				"tags": [
+					"Orders"
+				],
+				"security": [
+					{
+						"jwt": [
+							"ADMIN",
+							"STAFF"
+						]
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/OrderCreateBody"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/expenses": {
+			"get": {
+				"operationId": "GetExpenses",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"description": "Xem danh sách chi tiêu công ty",
+				"tags": [
+					"Expenses"
+				],
+				"security": [
+					{
+						"jwt": [
+							"ADMIN"
+						]
+					}
+				],
+				"parameters": []
+			},
+			"post": {
+				"operationId": "CreateExpense",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"description": "Tạo chi tiêu mới",
+				"tags": [
+					"Expenses"
+				],
+				"security": [
+					{
+						"jwt": [
+							"ADMIN"
+						]
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ExpenseCreateBody"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/employees": {
+			"get": {
+				"operationId": "GetEmployees",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"description": "Xem danh sách nhân viên",
+				"tags": [
+					"Employees"
+				],
+				"security": [
+					{
+						"jwt": [
+							"ADMIN"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "role",
+						"required": false,
+						"schema": {
+							"type": "string",
+							"enum": [
+								"ADMIN",
+								"STAFF"
+							]
+						}
+					}
+				]
+			},
+			"post": {
+				"operationId": "CreateEmployee",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"description": "Tạo nhân viên mới",
+				"tags": [
+					"Employees"
+				],
+				"security": [
+					{
+						"jwt": [
+							"ADMIN"
+						]
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/EmployeeCreateBody"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/employees/{id}": {
+			"get": {
+				"operationId": "GetEmployee",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"description": "Xem thông tin một nhân viên",
+				"tags": [
+					"Employees"
+				],
+				"security": [
+					{
+						"jwt": [
+							"ADMIN"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"put": {
+				"operationId": "UpdateEmployee",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"description": "Cập nhật thông tin nhân viên",
+				"tags": [
+					"Employees"
+				],
+				"security": [
+					{
+						"jwt": [
+							"ADMIN"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/EmployeeUpdateBody"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "DeleteEmployee",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"description": "Xoá nhân viên",
+				"tags": [
+					"Employees"
+				],
+				"security": [
+					{
+						"jwt": [
+							"ADMIN"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/customers": {
+			"get": {
+				"operationId": "GetCustomers",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"description": "Xem danh sách khách hàng\nStaff chỉ thấy khách hàng của mình",
+				"tags": [
+					"Customers"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "staffId",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "leadSourceId",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"post": {
+				"operationId": "CreateCustomer",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"description": "Tạo khách hàng mới",
+				"tags": [
+					"Customers"
+				],
+				"security": [
+					{
+						"jwt": [
+							"ADMIN",
+							"STAFF"
+						]
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CustomerCreateBody"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/customers/{id}": {
+			"get": {
+				"operationId": "GetCustomer",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"description": "Xem thông tin một khách hàng",
+				"tags": [
+					"Customers"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"put": {
+				"operationId": "UpdateCustomer",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"description": "Cập nhật thông tin khách hàng",
+				"tags": [
+					"Customers"
+				],
+				"security": [
+					{
+						"jwt": [
+							"ADMIN",
+							"STAFF"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CustomerUpdateBody"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "DeleteCustomer",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"description": "Xoá khách hàng (Chỉ Admin)",
+				"tags": [
+					"Customers"
+				],
+				"security": [
+					{
+						"jwt": [
+							"ADMIN"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		}
+	},
+	"servers": [
+		{
+			"url": "/"
+		}
+	]
+}
