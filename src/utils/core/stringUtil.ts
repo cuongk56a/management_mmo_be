@@ -1,5 +1,7 @@
-import {URL} from 'url';
+import { URL } from 'url';
 import { appConfigs } from '../../config/config';
+import console from 'console';
+import { requestContext } from '../../requestContext';
 
 export function removeVietnameseTones(str: string) {
   str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, 'a');
@@ -64,4 +66,14 @@ export function getImageUriFromFilename(filename: string) {
 
 export function getDataFromExcel(filename: string) {
   return `${appConfigs.services.svFile}/v1/attachment/excel/${filename}`;
+}
+
+export function getAttachemntUri(filename: string) {
+  if (!filename) return filename;
+  if (isUrlValid(filename)) return filename;
+
+  // Lấy domain từ context đang chạy
+  const store = requestContext.getStore();
+  const domain = store?.domain || appConfigs.services.svFile;
+  return `${domain}/uploads/${filename}`;
 }

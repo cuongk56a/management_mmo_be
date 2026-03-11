@@ -9,14 +9,8 @@ import { appConfigs } from '../../config/config';
 import { checkPassword, hashPassword } from '../../utils/hashUtil';
 import { getNewRefreshToken, getNewToken } from '../../config/passport';
 import { IUserDoc } from '../user/user.type';
-import { genCODE, genCode } from '../../utils/core/genCode';
-// import {IRoleDoc} from '../role/role.type';
-// import {roleService} from '../role/role.service';
-type IRoleDoc = any;
-const roleService: any = { getOne: async (filter: any) => null };
-import { UserModel } from '../user/user.model';
-// import { activityLogService } from '../activityLog/activityLog.service';
-const activityLogService: any = { createOne: async (data: any) => null };
+import { genCode } from '../../utils/core/genCode';
+
 const register = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
   const { email, password, confirmPassword, fullName, phone, code } = req.body;
   try {
@@ -25,11 +19,11 @@ const register = catchAsync(async (req: Request, res: Response, next: NextFuncti
       $or: [{ email: email }, { phone: phone }],
     });
     if (!!user) {
-      res.send({ code: httpStatus.BAD_REQUEST, status: 'Error', message: 'Email hoặc số điện thoại đã được sử dụng!' });
+      return res.send({ code: httpStatus.BAD_REQUEST, status: 'Error', message: 'Email or phone number already exists!' });
     } if (password !== confirmPassword) {
-      res.send({ code: httpStatus.BAD_REQUEST, status: 'Error', message: 'Mật khẩu và mật khẩu xác nhận không trùng nhau!' });
+      return res.send({ code: httpStatus.BAD_REQUEST, status: 'Error', message: 'Password and confirm password do not match!' });
     } else if (confirmCode !== code) {
-      res.send({ code: httpStatus.BAD_REQUEST, status: 'Error', message: 'Mã code không chính xác!' });
+      return res.send({ code: httpStatus.BAD_REQUEST, status: 'Error', message: 'Code is not correct!' });
     } else {
       const hashedPassword = await hashPassword(password);
       const data: IUserDoc | null = await userService.createOne({
@@ -41,7 +35,7 @@ const register = catchAsync(async (req: Request, res: Response, next: NextFuncti
       if (!data) {
         throw new ApiError(httpStatus.NOT_FOUND, 'Not Found');
       }
-      res.send({ code: httpStatus.OK, status: 'Success', message: 'Đăng ký thành công!' });
+      return res.send({ code: httpStatus.OK, status: 'Success', message: 'Register successfully!' });
     }
   } catch (error: any) {
     return next(new ApiError(httpStatus.NOT_FOUND, error.message));
@@ -64,9 +58,9 @@ const login = catchAsync(async (req: Request, res: Response, next: NextFunction)
           secure: appConfigs.env === 'production',
           sameSite: 'lax',
           path: '/',
-          maxAge: 7 * 24 * 60 * 60 * 1000,
+          maxAge: appConfigs.jwt.refreshExpirationDays * 24 * 60 * 60 * 1000,
         });
-        res.send({ code: httpStatus.OK, status: 'Success', message: 'Đăng nhập thành công!', data: user, token: token });
+        res.send({ code: httpStatus.OK, status: 'Success', message: 'Login successfully!', data: user, token: token });
       } else {
         res.send({ code: httpStatus.BAD_REQUEST, status: 'Error', message: 'Email Or Password Not Incorrect!' });
       }
@@ -92,7 +86,7 @@ const refresh = catchAsync(async (req: Request, res: Response, next: NextFunctio
         path: '/',
         maxAge: appConfigs.jwt.refreshExpirationDays * 24 * 60 * 60 * 1000,
       });
-      res.send({ code: httpStatus.OK, status: 'Success', message: 'Cấp lại token thành công!', data: user, token: token });
+      res.send({ code: httpStatus.OK, status: 'Success', message: 'Token refreshed successfully!', data: user, token: token });
     }
   } catch (error: any) {
     return next(new ApiError(httpStatus.NOT_FOUND, error.message));
@@ -103,11 +97,11 @@ const changePassword = catchAsync(async (req: Request, res: Response, next: Next
   const { password, newPassword, cfNewPassword, updatedById, ...body } = req.body;
   try {
     if (newPassword !== cfNewPassword) {
-      res.send({ code: httpStatus.BAD_REQUEST, status: 'Error', message: 'Mật khẩu mới và mật khẩu xác nhận không khớp!' });
+      res.send({ code: httpStatus.BAD_REQUEST, status: 'Error', message: 'New password and confirm password do not match!' });
     }
     const [user, hashedPassword] = await Promise.all([userService.getOne({ _id: updatedById }), hashPassword(newPassword)]);
     if (!user) {
-      res.send({ code: httpStatus.NOT_FOUND, status: 'Error', message: 'Người dùng không tồn tại!' });
+      res.send({ code: httpStatus.NOT_FOUND, status: 'Error', message: 'User not found!' });
     } else {
       const check = await checkPassword(password, user?.hashedPassword);
 
@@ -125,9 +119,9 @@ const changePassword = catchAsync(async (req: Request, res: Response, next: Next
             new: true,
           },
         );
-        res.send({ code: httpStatus.OK, status: 'Success', message: 'Đổi mật khẩu thành công!' });
+        res.send({ code: httpStatus.OK, status: 'Success', message: 'Change password success!' });
       } else {
-        res.send({ code: httpStatus.BAD_REQUEST, status: 'Error', message: 'Mật khẩu cũ không chính xác!' });
+        res.send({ code: httpStatus.BAD_REQUEST, status: 'Error', message: 'Password is not correct!' });
       }
     }
   } catch (error: any) {
@@ -170,26 +164,12 @@ const forgotPassword = catchAsync(async (req: Request, res: Response, next: Next
       await transporter.sendMail(received, (error: any, info: any) => {
         if (error) {
           console.log(error);
+          throw new ApiError(httpStatus.BAD_REQUEST, 'Send Email Error!')
         } else {
           console.log('Send Email Success! ' + info.response);
+          return res.send({ code: httpStatus.OK, status: 'Success', message: 'Password has been sent to your email!' });
         }
       });
-      res.send({ code: httpStatus.OK, status: 'Success!', message: 'Mật khẩu mới đã được gửi tới email của bạn!' });
-    }
-  } catch (error: any) {
-    return next(new ApiError(httpStatus.NOT_FOUND, error.message));
-  }
-});
-
-const loginPortal = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-  const { createdById, targetId } = req.body;
-  try {
-    const role: IRoleDoc | null = await roleService.getOne({ targetId, userId: createdById });
-    if (!role) {
-      res.send({ code: httpStatus.OK, status: 'Error' });
-    } else {
-      const access_token = getNewToken({ userId: createdById, roleId: role.id });
-      res.send({ code: httpStatus.OK, status: 'Success', access_token: access_token });
     }
   } catch (error: any) {
     return next(new ApiError(httpStatus.NOT_FOUND, error.message));
@@ -216,11 +196,12 @@ const sendMail = catchAsync(async (req: Request, res: Response, next: NextFuncti
     await transporter.sendMail(received, (error: any, info: any) => {
       if (error) {
         console.log(error);
+        throw new ApiError(httpStatus.BAD_REQUEST, 'Send Email Error!')
       } else {
         console.log('Send Email Success! ' + info.response);
+        return res.send({ code: httpStatus.OK, status: 'Success', message: 'Send Email Success!' });
       }
     });
-    res.send('Send Email Success!');
   } catch (error: any) {
     return next(new ApiError(httpStatus.NOT_FOUND, error.message));
   }
@@ -232,6 +213,5 @@ export const authController = {
   refresh,
   changePassword,
   forgotPassword,
-  loginPortal,
   sendMail,
 };

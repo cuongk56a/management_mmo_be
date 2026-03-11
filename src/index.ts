@@ -18,6 +18,7 @@ declare global {
       userId: any;
       roleId: any;
       isAdmin: boolean;
+      domainUrl: any;
     }
   }
 }

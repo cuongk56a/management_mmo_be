@@ -3,7 +3,7 @@ import { IUserDoc, UserGender } from './user.type';
 import { IDocModel } from '../../utils/types/entityTypes';
 import { TABLE_USER } from './user.configs';
 import { paginate, toJSON } from '../../utils/plugins';
-import { getImageUriFromFilename } from '../../utils/core/stringUtil';
+import { getAttachemntUri } from '../../utils/core/stringUtil';
 
 export interface IUserModelDoc extends IUserDoc { }
 interface IUserModel extends IDocModel<IUserModelDoc> { }
@@ -66,7 +66,7 @@ const userSchema = new mongoose.Schema<IUserModelDoc>(
 );
 
 userSchema.virtual('avatarUri').get(function () {
-  return getImageUriFromFilename(this.avatar || '');
+  return getAttachemntUri(this.avatar || '');
 });
 
 userSchema.plugin(toJSON);

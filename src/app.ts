@@ -4,6 +4,7 @@ import httpStatus from 'http-status';
 import routes from './routes/v1';
 import fileUpload from 'express-fileupload';
 import { rateLimit } from 'express-rate-limit';
+import { requestContext } from './requestContext';
 const app = express();
 var bodyParser = require('body-parser');
 
@@ -60,7 +61,17 @@ import path from 'path';
 app.use(passport.initialize() as any);
 passport.use('jwt', jwtStrategy);
 
+//Domain
+app.use((req, res, next) => {
+  const domain = `${req.protocol}://${req.get('host')}`;
+
+  requestContext.run({ domain }, () => {
+    next();
+  });
+});
+
 app.use("/uploads", express.static("uploads"));
+
 import { RegisterRoutes } from './tsoaRoutes/routes';
 app.use('/v1', routes);
 RegisterRoutes(app);
