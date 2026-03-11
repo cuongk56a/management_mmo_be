@@ -78,15 +78,6 @@ export class AuthTsoaController extends Controller {
     }
 
     /**
-     * Đăng nhập Portal
-     */
-    @Security('jwt')
-    @Post('login-portal')
-    public async loginPortal(@Body() body: LoginPortalBody): Promise<any> {
-        return;
-    }
-
-    /**
      * Gửi mail xác thực
      */
     @Post('send-mail')

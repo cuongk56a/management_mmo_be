@@ -412,15 +412,6 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"LoginPortalBody": {
-				"properties": {
-					"targetId": {
-						"type": "string"
-					}
-				},
-				"type": "object",
-				"additionalProperties": false
-			},
 			"SendMailBody": {
 				"properties": {
 					"email": {
@@ -1744,41 +1735,6 @@
 						"application/json": {
 							"schema": {
 								"$ref": "#/components/schemas/ForgotPasswordBody"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/auth/login-portal": {
-			"post": {
-				"operationId": "LoginPortal",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {}
-							}
-						}
-					}
-				},
-				"description": "Đăng nhập Portal",
-				"tags": [
-					"Auth"
-				],
-				"security": [
-					{
-						"jwt": []
-					}
-				],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/LoginPortalBody"
 							}
 						}
 					}
