@@ -55,6 +55,73 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"CreateUserBody": {
+				"properties": {
+					"email": {
+						"type": "string"
+					},
+					"phone": {
+						"type": "string"
+					},
+					"fullName": {
+						"type": "string"
+					},
+					"avatar": {
+						"type": "string"
+					},
+					"birthday": {
+						"type": "string"
+					},
+					"country": {
+						"type": "string"
+					},
+					"address": {
+						"type": "string"
+					},
+					"organizationId": {
+						"type": "string"
+					},
+					"classId": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"fullName",
+					"classId"
+				],
+				"type": "object",
+				"additionalProperties": {}
+			},
+			"UpdateUserBody": {
+				"properties": {
+					"email": {
+						"type": "string"
+					},
+					"phone": {
+						"type": "string"
+					},
+					"fullName": {
+						"type": "string"
+					},
+					"avatar": {
+						"type": "string"
+					},
+					"birthday": {
+						"type": "string"
+					},
+					"country": {
+						"type": "string"
+					},
+					"address": {
+						"type": "string"
+					},
+					"organizationId": {
+						"type": "string"
+					}
+				},
+				"type": "object",
+				"additionalProperties": {}
+			},
 			"ProductCreateBody": {
 				"properties": {
 					"name": {
@@ -278,6 +345,90 @@
 				},
 				"type": "object",
 				"additionalProperties": false
+			},
+			"RegisterBody": {
+				"properties": {
+					"email": {
+						"type": "string"
+					},
+					"password": {
+						"type": "string"
+					},
+					"fullName": {
+						"type": "string"
+					},
+					"phone": {
+						"type": "string"
+					},
+					"code": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"email"
+				],
+				"type": "object",
+				"additionalProperties": {}
+			},
+			"LoginBody": {
+				"properties": {
+					"email": {
+						"type": "string"
+					},
+					"password": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"email"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ChangePasswordBody": {
+				"properties": {
+					"password": {
+						"type": "string"
+					},
+					"newPassword": {
+						"type": "string"
+					},
+					"cfNewPassword": {
+						"type": "string"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ForgotPasswordBody": {
+				"properties": {
+					"email": {
+						"type": "string"
+					},
+					"code": {
+						"type": "string"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"LoginPortalBody": {
+				"properties": {
+					"targetId": {
+						"type": "string"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"SendMailBody": {
+				"properties": {
+					"email": {
+						"type": "string"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
 			}
 		},
 		"securitySchemes": {
@@ -442,6 +593,229 @@
 				"parameters": []
 			}
 		},
+		"/user": {
+			"post": {
+				"operationId": "CreateUser",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"description": "Tạo user mới",
+				"tags": [
+					"User"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CreateUserBody"
+							}
+						}
+					}
+				}
+			},
+			"get": {
+				"operationId": "GetList",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"description": "Lấy danh sách user có phân trang",
+				"tags": [
+					"User"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "sort",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "limit",
+						"required": false,
+						"schema": {
+							"default": 10,
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "page",
+						"required": false,
+						"schema": {
+							"default": 1,
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "search",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "phone",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "email",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "isAdmin",
+						"required": false,
+						"schema": {
+							"type": "boolean"
+						}
+					}
+				]
+			}
+		},
+		"/user/all": {
+			"get": {
+				"operationId": "GetAll",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"description": "Lấy danh sách toàn bộ user (Admin)",
+				"tags": [
+					"User"
+				],
+				"security": [
+					{
+						"jwt": [
+							"ADMIN",
+							"SELLER"
+						]
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/user/{userId}": {
+			"get": {
+				"operationId": "GetOne",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"description": "Lấy thông tin chi tiết một user",
+				"tags": [
+					"User"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "userId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"patch": {
+				"operationId": "UpdateOne",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"description": "Cập nhật thông tin user",
+				"tags": [
+					"User"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "userId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UpdateUserBody"
+							}
+						}
+					}
+				}
+			}
+		},
 		"/reports/monthly": {
 			"get": {
 				"operationId": "GetMonthlyReport",
@@ -455,7 +829,7 @@
 						}
 					}
 				},
-				"description": "Xem chi tiết báo cáo 1 tháng định sẵn. Sẽ tự động trích xuất / tổng kết mới nhất\r\nGửi param YYYY-MM",
+				"description": "Xem chi tiết báo cáo 1 tháng định sẵn. Sẽ tự động trích xuất / tổng kết mới nhất\nGửi param YYYY-MM",
 				"tags": [
 					"Reports"
 				],
@@ -723,7 +1097,7 @@
 						}
 					}
 				},
-				"description": "Xem danh sách đơn hàng\r\nStaff chỉ thấy đơn hàng của khách hàng do mình quản lý",
+				"description": "Xem danh sách đơn hàng\nStaff chỉ thấy đơn hàng của khách hàng do mình quản lý",
 				"tags": [
 					"Orders"
 				],
@@ -1049,7 +1423,7 @@
 						}
 					}
 				},
-				"description": "Xem danh sách khách hàng\r\nStaff chỉ thấy khách hàng của mình",
+				"description": "Xem danh sách khách hàng\nStaff chỉ thấy khách hàng của mình",
 				"tags": [
 					"Customers"
 				],
@@ -1225,6 +1599,221 @@
 						}
 					}
 				]
+			}
+		},
+		"/auth/register": {
+			"post": {
+				"operationId": "Register",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"description": "Đăng ký tài khoản mới",
+				"tags": [
+					"Auth"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/RegisterBody"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/auth/login": {
+			"post": {
+				"operationId": "Login",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"description": "Đăng nhập",
+				"tags": [
+					"Auth"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/LoginBody"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/auth/refresh": {
+			"post": {
+				"operationId": "Refresh",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"description": "Cấp lại token",
+				"tags": [
+					"Auth"
+				],
+				"security": [],
+				"parameters": []
+			}
+		},
+		"/auth/change-password": {
+			"patch": {
+				"operationId": "ChangePassword",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"description": "Đổi mật khẩu",
+				"tags": [
+					"Auth"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ChangePasswordBody"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/auth/forgot-password": {
+			"post": {
+				"operationId": "ForgotPassword",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"description": "Quên mật khẩu",
+				"tags": [
+					"Auth"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ForgotPasswordBody"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/auth/login-portal": {
+			"post": {
+				"operationId": "LoginPortal",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"description": "Đăng nhập Portal",
+				"tags": [
+					"Auth"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/LoginPortalBody"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/auth/send-mail": {
+			"post": {
+				"operationId": "SendMail",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"description": "Gửi mail xác thực",
+				"tags": [
+					"Auth"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/SendMailBody"
+							}
+						}
+					}
+				}
 			}
 		}
 	},

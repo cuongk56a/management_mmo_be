@@ -1,8 +1,8 @@
-import {faker} from '@faker-js/faker';
-import {TABLE_USER} from '../modules/user/user.configs';
+import { faker } from '@faker-js/faker';
+import { TABLE_USER } from '../modules/user/user.configs';
 import { getRandomInt } from '../utils/RamdomString';
-import {UserModel} from '../modules/user/user.model';
-import {fakeImages} from './images/images';
+import { UserModel } from '../modules/user/user.model';
+import { fakeImages } from './images/images';
 // import { OrganizationModel } from '../modules/organization/organization.model';
 // import { BrandModel } from '../modules/brand/brand.model';
 // import { CategoryModel } from '../modules/category/category.model';
@@ -12,6 +12,7 @@ import {fakeImages} from './images/images';
 const companyId = '652de593d0bcb141c425c2c9';
 const adminCId = '6611a315fd097185cd665704';
 const adminTId = '652fe549427be99351822536';
+const adminQId = '69b108e33688a91334725e19';
 const brandId = '643f7d47132d00ffe0ec7d5a';
 const categoryId = '642ee729fce32ca0f1063f2c';
 const unitId = '63f6c9c699a2dd615fd22688';
@@ -60,6 +61,16 @@ const fake = async () => {
         phone: '0386653766',
         hashedPassword: '$2a$10$wKtYXjxy8oFGsNa3TiP6d./0vq0K0WiSl826Mxn42r7OiYQFxgiw.',//123123
         email: 'tannv.3201@gmail.com',
+        isAdmin: true
+      },
+      {
+        _id: adminTId,
+        CODE: 'QUANHH01',
+        fullName: 'Admin Quân',
+        description: faker.lorem.words(30),
+        phone: '0346785893',
+        hashedPassword: '$2a$10$wKtYXjxy8oFGsNa3TiP6d./0vq0K0WiSl826Mxn42r7OiYQFxgiw.',//123123
+        email: 'hohongquan25@gmail.com',
         isAdmin: true
       }
     ])

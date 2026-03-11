@@ -47,7 +47,7 @@ app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 
 // parse urlencoded request body
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
-app.use(fileUpload());
+app.use(fileUpload() as any);
 // enable cors
 app.use(cors());
 app.options('*', cors());
@@ -69,7 +69,33 @@ import swaggerUi from 'swagger-ui-express';
 import * as fs from 'fs';
 try {
   const swaggerDocument = JSON.parse(fs.readFileSync(path.join(__dirname, '../public/swagger.json'), 'utf8'));
-  app.use('/docs', swaggerUi.serve as any, swaggerUi.setup(swaggerDocument) as any);
+  app.use('/docs',
+    (req, res, next) => {
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+      next();
+    },
+    swaggerUi.serve as any,
+    (req, res) => {
+      try {
+        const swaggerPath = path.join(__dirname, '../public/swagger.json');
+        const swaggerDocument = JSON.parse(fs.readFileSync(swaggerPath, 'utf8'));
+        swaggerDocument.servers = [
+          {
+            url: "/v1",
+            description: "Current Server"
+          }
+        ];
+
+        const html = swaggerUi.generateHTML(swaggerDocument);
+        const noCacheHtml = html.replace('swagger-ui-init.js', `swagger-ui-init.js?v=${Date.now()}`);
+        res.send(noCacheHtml);
+      } catch (error) {
+        res.status(500).send('Swagger file not generated yet...');
+      }
+    }
+  );
 } catch (error) {
   console.log('Swagger file not generated yet, skip serving /docs');
 }

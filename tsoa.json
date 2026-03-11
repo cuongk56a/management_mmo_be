@@ -1,23 +1,23 @@
 {
-    "entryFile": "src/app.ts",
-    "noImplicitAdditionalProperties": "throw-on-extras",
-    "controllerPathGlobs": [
-        "src/modules/**/*.controller.ts"
-    ],
-    "spec": {
-        "outputDirectory": "public",
-        "specVersion": 3,
-        "securityDefinitions": {
-            "jwt": {
-                "type": "http",
-                "scheme": "bearer",
-                "bearerFormat": "JWT"
-            }
-        }
-    },
-    "routes": {
-        "routesDir": "src/tsoaRoutes",
-        "basePath": "/v1",
-        "authenticationModule": "./src/middlewares/tsoaAuthentication.ts"
+  "entryFile": "src/app.ts",
+  "noImplicitAdditionalProperties": "throw-on-extras",
+  "controllerPathGlobs": [
+    "src/modules/**/*.controller.ts"
+  ],
+  "spec": {
+    "outputDirectory": "public",
+    "specVersion": 3,
+    "securityDefinitions": {
+      "jwt": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
     }
+  },
+  "routes": {
+    "routesDir": "src/tsoaRoutes",
+    "basePath": "/v1",
+    "authenticationModule": "./src/middlewares/tsoaAuthentication.ts"
+  }
 }

@@ -6,7 +6,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "swagger": "tsoa routes && tsoa spec",
-    "dev": "yarn swagger && cross-env NODE_ENV=development nodemon src/index.js"
+    "dev": "yarn swagger && cross-env NODE_ENV=development nodemon src/index.js",
+    "build": "yarn swagger && tsoa spec-and-routes && tsc",
+    "prod": "yarn build && cross-env NODE_ENV=production node dist/index.js"
   },
   "keywords": [],
   "author": "",

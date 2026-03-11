@@ -90,7 +90,7 @@ const refresh = catchAsync(async (req: Request, res: Response, next: NextFunctio
         secure: appConfigs.env === 'production',
         sameSite: 'lax',
         path: '/',
-        maxAge: 7 * 24 * 60 * 60 * 1000,
+        maxAge: appConfigs.jwt.refreshExpirationDays * 24 * 60 * 60 * 1000,
       });
       res.send({ code: httpStatus.OK, status: 'Success', message: 'Cấp lại token thành công!', data: user, token: token });
     }
