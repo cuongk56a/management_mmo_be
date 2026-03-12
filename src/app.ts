@@ -5,7 +5,10 @@ import routes from './routes/v1';
 import fileUpload from 'express-fileupload';
 import { rateLimit } from 'express-rate-limit';
 import { requestContext } from './requestContext';
+import cookieParser from 'cookie-parser';
+import helmet from 'helmet';
 const app = express();
+// app.set('trust proxy', 1);
 var bodyParser = require('body-parser');
 
 app.use(express.static('public'));
@@ -19,12 +22,20 @@ import ApiError from './utils/core/ApiError';
 import { errorConverter, errorHandler } from './middlewares/error';
 
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 phút
-  max: 100, // giới hạn mỗi IP chỉ được 100 yêu cầu trong 15 phút
+  windowMs: 15 * 60 * 1000,
+  max: 100,
   message: 'Quá nhiều yêu cầu từ IP này, vui lòng thử lại sau 15 phút.',
   skipSuccessfulRequests: true,
-  keyGenerator: (req: any, res: any) => {
-    return req.headers['x-forwarded-for'] || req.headers['x-real-ip'];
+  keyGenerator: (req: Request) => {
+    const cfIp = req.headers['cf-connecting-ip'];
+    if (cfIp) return cfIp as string;
+
+    const forwardedFor = req.headers['x-forwarded-for'];
+    if (forwardedFor) {
+      return typeof forwardedFor === 'string' ? forwardedFor.split(',')[0].trim() : forwardedFor[0];
+    }
+
+    return req.ip || 'unknown-ip';
   },
 });
 // app.use(limiter);
@@ -44,22 +55,34 @@ app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 // app.use(express.static(path.join(__dirname, 'public')));
 
 // Set security HTTP headers
-// app.use(helmet());
+app.use(helmet());
 
 // parse urlencoded request body
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+app.use(cookieParser() as any);
 app.use(fileUpload() as any);
+
 // enable cors
-app.use(cors());
-app.options('*', cors());
+// app.use(cors());
+// app.options('*', cors());
+app.use(cors({
+  origin: true, // Sẽ tự động lấy origin của FE gọi tới để map vào Allow-Origin (hoặc bạn có thể truyền array ['http://localhost:5173', 'https://domain-fe.com'])
+  credentials: true, // BẮT BUỘC: Cho phép FE đính kèm cookie/header xác thực
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-forwarded-for', 'cf-connecting-ip']
+}));
+app.options('*', cors({
+  origin: true,
+  credentials: true
+}));
 
 // // jwt authentication
 import passport from 'passport';
-import { jwtStrategy } from './config/passport';
+import { jwtStrategy, googleStrategy } from './config/passport';
 import path from 'path';
-// import helmet from 'helmet';
 app.use(passport.initialize() as any);
 passport.use('jwt', jwtStrategy);
+passport.use('google', googleStrategy);
 
 //Domain
 app.use((req, res, next) => {
@@ -78,8 +101,8 @@ RegisterRoutes(app);
 
 import swaggerUi from 'swagger-ui-express';
 import * as fs from 'fs';
+
 try {
-  const swaggerDocument = JSON.parse(fs.readFileSync(path.join(__dirname, '../public/swagger.json'), 'utf8'));
   app.use('/docs',
     (req, res, next) => {
       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');

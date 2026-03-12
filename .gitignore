@@ -5,6 +5,7 @@ build_production
 
 files/leads/*
 uploads/*
+logs/*
 
 # yarn error logs
 yarn-error.log

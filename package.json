@@ -17,6 +17,7 @@
     "@faker-js/faker": "^8.4.1",
     "@types/bcryptjs": "^2.4.6",
     "@types/bull": "^4.10.0",
+    "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.17",
     "@types/express": "4",
     "@types/express-fileupload": "^1.5.1",
@@ -46,11 +47,13 @@
     "typescript": "^5.4.3"
   },
   "dependencies": {
+    "@types/passport-google-oauth20": "^2.0.17",
     "axios": "^1.6.8",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.2",
     "bull": "^4.12.9",
     "connect-redis": "^7.1.1",
+    "cookie-parser": "^1.4.7",
     "cookie-session": "^2.1.0",
     "cors": "^2.8.5",
     "cross-env": "^7.0.3",
@@ -61,7 +64,7 @@
     "express-rate-limit": "^7.4.0",
     "faker": "^6.6.6",
     "form-data": "^4.0.0",
-    "helmet": "^7.1.0",
+    "helmet": "^8.1.0",
     "http-status": "^1.7.4",
     "joi": "^17.12.2",
     "jsonwebtoken": "^9.0.2",
@@ -80,6 +83,7 @@
     "node-cron": "^3.0.3",
     "nodemailer": "^6.9.13",
     "passport": "^0.7.0",
+    "passport-google-oauth20": "^2.0.0",
     "passport-jwt": "^4.0.1",
     "redis": "^4.6.13",
     "socket.io": "^4.7.5",
@@ -87,6 +91,7 @@
     "swagger-ui-express": "^5.0.1",
     "tsoa": "^7.0.0-alpha.0",
     "winston": "^3.13.0",
+    "winston-daily-rotate-file": "^5.0.0",
     "xlsx": "^0.18.5",
     "yarn": "^1.22.22"
   }

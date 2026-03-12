@@ -3,48 +3,41 @@ import { customValidations } from '../../utils/validations/custom.validation';
 
 const register = {
   body: Joi.object().keys({
-    fullName: Joi.string().required(),
-    phone: Joi.string().required(),
-    email: Joi.string().email().required(),
-    password: Joi.string().required(),
-    confirmPassword: Joi.string().required(),
-    code: Joi.string().required(),
+    fullName: Joi.string().trim().required(),
+    phone: Joi.string().trim().required(),
+    email: Joi.string().email().trim().required(),
+    password: Joi.string().trim().required(),
+    confirmPassword: Joi.string().trim().required(),
+    code: Joi.string().trim().required(),
   }),
 };
 
 const login = {
   body: Joi.object().keys({
-    email: Joi.string().email().required(),
-    password: Joi.string().required(),
+    email: Joi.string().email().trim().required(),
+    password: Joi.string().trim().required(),
   })
 }
 
 const changePassword = {
   body: Joi.object().keys({
-    password: Joi.string().required(),
-    newPassword: Joi.string().required(),
-    cfNewPassword: Joi.string().required(),
+    password: Joi.string().trim().required(),
+    newPassword: Joi.string().trim().required(),
+    cfNewPassword: Joi.string().trim().required(),
     ...customValidations.updateEntityValidation
   }),
 }
 
 const forgotPassword = {
   body: Joi.object().keys({
-    email: Joi.string().email().required(),
-    code: Joi.string().required(),
-  })
-}
-
-const loginPortal = {
-  body: Joi.object().keys({
-    targetId: Joi.string().custom(customValidations.objectId).required(),
-    ...customValidations.createEntityValidation,
+    email: Joi.string().email().trim().required(),
+    code: Joi.string().trim().required(),
   })
 }
 
 const sendMail = {
   body: Joi.object().keys({
-    email: Joi.string().email().required(),
+    email: Joi.string().email().trim().required(),
   })
 }
 
@@ -53,6 +46,5 @@ export const authValidation = {
   login,
   changePassword,
   forgotPassword,
-  loginPortal,
   sendMail,
 };

@@ -16,7 +16,7 @@ import { OrderController } from './../modules/order/order.controller';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { ExpenseController } from './../modules/expense/expense.controller';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-import { EmployeeController } from './../modules/employee/employee.controller';
+import { EmployeeController } from '../modules/employee/employee.tsoa.controller';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { CustomerController } from './../modules/customer/customer.controller';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -212,14 +212,6 @@ const models: TsoaRoute.Models = {
     "properties": {
       "email": { "dataType": "string" },
       "code": { "dataType": "string" },
-    },
-    "additionalProperties": false,
-  },
-  // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-  "LoginPortalBody": {
-    "dataType": "refObject",
-    "properties": {
-      "targetId": { "dataType": "string" },
     },
     "additionalProperties": false,
   },

@@ -3,25 +3,26 @@ import { ProductModel } from './product.model';
 import ApiError from '../../utils/core/ApiError';
 import httpStatus from 'http-status';
 import { RedisService } from '../../redis/RedisService';
+import { appConfigs } from '../../config/config';
 
 export class ProductService {
   static async createProduct(productBody: any) {
     const product = await ProductModel.create(productBody);
-    await RedisService.setCachedProducts(null); // Clear cache
+    await RedisService.removeCachedProducts(); // Clear cache
     return product;
   }
 
   static async getProducts(query: any) {
     // Basic caching implementation if no query passed
     if (Object.keys(query).length === 0) {
-      const cachedProducts = await RedisService.getCachedProducts();
+      const cachedProducts = await RedisService.getCachedProducts('app:products');
       if (cachedProducts) {
         return cachedProducts;
       }
     }
     const products = await ProductModel.find(query);
     if (Object.keys(query).length === 0) {
-       await RedisService.setCachedProducts(products); // default app:products key
+      await RedisService.setCachedProducts(products, 'app:products', appConfigs.jwt.refreshExpirationDays * 24 * 60 * 60 * 1000); // default app:products key
     }
     return products;
   }
@@ -38,9 +39,9 @@ export class ProductService {
     const product = await this.getProductById(id);
     Object.assign(product, updateBody);
     await product.save();
-    
+
     // Xóa cache
-    await RedisService.setCachedProducts(null);
+    await RedisService.removeCachedProducts();
     return product;
   }
 
@@ -52,7 +53,7 @@ export class ProductService {
     await product.deleteOne();
 
     // Xóa cache
-    await RedisService.setCachedProducts(null);
+    await RedisService.removeCachedProducts();
     return product;
   }
 }

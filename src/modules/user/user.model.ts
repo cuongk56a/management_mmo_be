@@ -72,17 +72,9 @@ userSchema.virtual('avatarUri').get(function () {
 userSchema.plugin(toJSON);
 userSchema.plugin(paginate);
 
-const populateArr = ({ hasAddress, hasRole }: { hasAddress: boolean, hasRole: boolean }) => {
+const populateArr = ({ hasRole }: { hasRole: boolean }) => {
   let pA: any[] = [];
   return pA
-    .concat(
-      !!hasAddress
-        ? {
-          path: 'address',
-          options: { hasLocation: true }
-        }
-        : [],
-    )
     .concat(
       !!hasRole
         ? {

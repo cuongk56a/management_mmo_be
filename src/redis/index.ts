@@ -23,8 +23,12 @@ export const setRedisAsync = async (key: string, value: any) => {
     await client.set(key, value);
 };
 
-export const clearRedisAsync = async (key: string, time: number) => {
+export const setExpireRedisAsync = async (key: string, time: number) => {
     await client.expire(key, time)
+}
+
+export const clearRedisAsync = async (key: string) => {
+    await client.del(key)
 }
 
 export const onConnetCallback = (callback: () => void) => {

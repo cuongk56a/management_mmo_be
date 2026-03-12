@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 import Joi from 'joi';
 
-dotenv.config({path: path.join(__dirname, '../../.env')});
+dotenv.config({ path: path.join(__dirname, '../../.env') });
 
 const envVarsSchema = Joi.object()
   .keys({
@@ -10,7 +10,7 @@ const envVarsSchema = Joi.object()
     PORT: Joi.number().default(3000),
 
     REDIS_HOST: Joi.string().default('127.0.0.1'),
-    REDIS_PORT: Joi.string().default(6379),
+    REDIS_PORT: Joi.number().default(6379),
     REDIS_PASSWORD: Joi.string().allow('', null),
     MONGODB_URL: Joi.string().required().description('Mongo DB url'),
     TABLE_PREFIX: Joi.string().required(),
@@ -36,10 +36,14 @@ const envVarsSchema = Joi.object()
     EMAIL: Joi.string().email().required(),
     PASS: Joi.string().required(),
     SERVICE_FILE_URI: Joi.string().required(),
+    GOOGLE_CLIENT_ID: Joi.string().required().description('Google OAuth Client ID'),
+    GOOGLE_CLIENT_SECRET: Joi.string().required().description('Google OAuth Client Secret'),
+    GOOGLE_CALLBACK_URL: Joi.string().required().description('Google OAuth Callback URL'),
+    FRONTEND_URL: Joi.string().required().description('Frontend URL'),
   })
   .unknown();
 
-const {value: envVars, error} = envVarsSchema.prefs({errors: {label: 'key'}}).validate(process.env);
+const { value: envVars, error } = envVarsSchema.prefs({ errors: { label: 'key' } }).validate(process.env);
 
 if (error) {
   throw new Error(`Config validation error: ${error.message}`);
@@ -48,9 +52,8 @@ if (error) {
 export const appConfigs = {
   env: envVars.NODE_ENV,
   port: envVars.PORT,
-  redis: `redis://:${!!envVars.REDIS_PASSWORD ? envVars.REDIS_PASSWORD + '@' : ''}@${envVars.REDIS_HOST}:${
-    envVars.REDIS_PORT
-  }`,
+  redis: `redis://:${!!envVars.REDIS_PASSWORD ? envVars.REDIS_PASSWORD + '@' : ''}@${envVars.REDIS_HOST}:${envVars.REDIS_PORT
+    }`,
   redisHost: envVars.REDIS_HOST,
   redisPort: envVars.REDIS_PORT,
   redisPassword: envVars.REDIS_PASSWORD,
@@ -84,8 +87,12 @@ export const appConfigs = {
   google: {
     email: envVars.EMAIL,
     pass: envVars.PASS,
+    clientId: envVars.GOOGLE_CLIENT_ID,
+    clientSecret: envVars.GOOGLE_CLIENT_SECRET,
+    callbackUrl: envVars.GOOGLE_CALLBACK_URL,
   },
   services: {
     svFile: envVars.SERVICE_FILE_URI,
+    frontendUrl: envVars.FRONTEND_URL,
   },
 };

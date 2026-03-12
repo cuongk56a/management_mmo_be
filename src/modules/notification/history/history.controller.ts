@@ -1,47 +1,78 @@
-import {NextFunction, Request, Response} from 'express';
+import { NextFunction, Request, Response } from 'express';
 import httpStatus from 'http-status';
 import ApiError from '../../../utils/core/ApiError';
-import {catchAsync} from '../../../utils/core/catchAsync';
-import {pick} from '../../../utils/core/pick';
-import {historyService} from './history.service';
-import { IHistoryDoc } from './history.type';
+import { catchAsync } from '../../../utils/core/catchAsync';
+import { pick } from '../../../utils/core/pick';
+import { historyService } from './history.service';
 
 const createOne = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
   try {
     const data = await historyService.createOne(req.body);
-    if (!data) {
-      throw new ApiError(httpStatus.NOT_FOUND, 'Not Found');
-    }
+    if (!data) throw new ApiError(httpStatus.NOT_FOUND, 'Not Found');
     res.send(data);
   } catch (error: any) {
-    return next(new ApiError(httpStatus.NOT_FOUND, error.message));
+    return next(new ApiError(httpStatus.BAD_REQUEST, error.message));
   }
 });
 
-const updateOne = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-  const {historyId} = req.params;
-  const {isRead, readAt, ...body} = req.body;
+/**
+ * PATCH /:historyId
+ * Đánh dấu thông báo đã đọc
+ * - Chỉ set isRead + readAt nếu chưa đọc (readAt chưa tồn tại)
+ * - Sau khi update, hook afterHistoryUpdate sẽ tự emit socket COUNT_NOTIFI_NO_READ
+ */
+const markAsRead = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const { historyId } = req.params;
   try {
-    let history = await historyService.getOne({_id: historyId});
-    if(!history){
-      throw new ApiError(httpStatus.NOT_FOUND, 'Not Found');
+    const history = await historyService.getOne({ _id: historyId });
+    if (!history) throw new ApiError(httpStatus.NOT_FOUND, 'Not Found');
+
+    // Nếu đã đọc rồi thì trả về luôn, không update lại
+    if (history.readAt) {
+      return res.send(history);
     }
-    if(!history.readAt){
-      history = await historyService.updateOne({_id: historyId}, req.body);
-    }
-    res.send(history)
+
+    const updated = await historyService.updateOne(
+      { _id: historyId },
+      {
+        isRead: true,
+        readAt: new Date(),
+      },
+    );
+
+    res.send(updated);
   } catch (error: any) {
-    return next(new ApiError(httpStatus.NOT_FOUND, error.message));
+    return next(new ApiError(httpStatus.BAD_REQUEST, error.message));
+  }
+});
+
+/**
+ * PATCH /read-all
+ * Đánh dấu TẤT CẢ thông báo của user là đã đọc
+ * Body: { userId }
+ */
+const markAllAsRead = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const userId = (req as any).user?._id || req.body.userId;
+    if (!userId) throw new ApiError(httpStatus.BAD_REQUEST, 'userId is required');
+
+    const now = new Date();
+    await historyService.updateMany(
+      { userId, isRead: false, deletedAt: { $exists: false } },
+      { isRead: true, readAt: now },
+    );
+
+    res.send({ success: true, message: 'Đã đánh dấu tất cả thông báo là đã đọc' });
+  } catch (error: any) {
+    return next(new ApiError(httpStatus.BAD_REQUEST, error.message));
   }
 });
 
 const deleteOne = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-  const {historyId} = req.params;
+  const { historyId } = req.params;
   try {
-    const data = await historyService.updateOne({_id: historyId},req.body);
-    if (!data) {
-      throw new ApiError(httpStatus.NOT_FOUND, 'Not Found');
-    }
+    const data = await historyService.updateOne({ _id: historyId }, req.body);
+    if (!data) throw new ApiError(httpStatus.NOT_FOUND, 'Not Found');
     res.status(httpStatus.NO_CONTENT).send();
   } catch (error: any) {
     return next(new ApiError(httpStatus.NOT_FOUND, error.message));
@@ -49,13 +80,11 @@ const deleteOne = catchAsync(async (req: Request, res: Response, next: NextFunct
 });
 
 const getOne = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-  const {historyId} = req.params;
-  const options = pick(req.query, ['hasNotification']);
+  const { historyId } = req.params;
+  const options = pick(req.query, ['hasNotification', 'hasUser']);
   try {
-    const data = await historyService.getOne({_id: historyId}, options);
-    if (!data) {
-      throw new ApiError(httpStatus.NOT_FOUND, 'Not Found');
-    }
+    const data = await historyService.getOne({ _id: historyId }, options);
+    if (!data) throw new ApiError(httpStatus.NOT_FOUND, 'Not Found');
     res.send(data);
   } catch (error: any) {
     return next(new ApiError(httpStatus.NOT_FOUND, error.message));
@@ -63,45 +92,50 @@ const getOne = catchAsync(async (req: Request, res: Response, next: NextFunction
 });
 
 const getList = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-  const filter = pick(req.query, ['userId', 'isRead']);
-  const queryOptions = pick(req.query, ['limit', 'page']);
-  const options = pick(req.query, ['hasNotification']);
+  const filter = pick(req.query, ['userId', 'isRead', 'notifiId']);
+  const queryOptions = pick(req.query, ['limit', 'page', 'sortBy']);
+  const populateOptions = pick(req.query, ['hasNotification', 'hasUser']);
   try {
-    const data = await historyService.getList(filter, {...queryOptions, options});
+    const data = await historyService.getList(filter, { ...queryOptions, ...populateOptions });
     res.send(data);
   } catch (error: any) {
-    return next(new ApiError(httpStatus.NOT_FOUND, error.message));
+    return next(new ApiError(httpStatus.BAD_REQUEST, error.message));
   }
 });
 
 const getAll = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-  const filter = pick(req.query, ['userId', 'isRead']);
-  const options = pick(req.query, ['hasNotification']);
+  const filter = pick(req.query, ['userId', 'isRead', 'notifiId']);
+  const options = pick(req.query, ['hasNotification', 'hasUser']);
   try {
     const data = await historyService.getAll(filter, options);
     res.send(data);
   } catch (error: any) {
-    return next(new ApiError(httpStatus.NOT_FOUND, error.message));
+    return next(new ApiError(httpStatus.BAD_REQUEST, error.message));
   }
 });
 
-const getCountNoRead = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-  const filter = pick(req.query, ['userId', 'isRead']);
+/**
+ * GET /count?userId=xxx
+ * Trả về số thông báo CHƯA ĐỌC của user
+ */
+const getCountUnread = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const userId = (req as any).user?._id || req.query.userId;
   try {
-    const data = await historyService.getCount(filter);
-    res.send({count: data});
+    if (!userId) throw new ApiError(httpStatus.BAD_REQUEST, 'userId is required');
+    const count = await historyService.getCountUnread(String(userId));
+    res.send({ count });
   } catch (error: any) {
-    return next(new ApiError(httpStatus.NOT_FOUND, error.message));
+    return next(new ApiError(httpStatus.BAD_REQUEST, error.message));
   }
 });
-
 
 export const historyController = {
   createOne,
-  updateOne,
+  markAsRead,
+  markAllAsRead,
   deleteOne,
   getOne,
   getAll,
   getList,
-  getCountNoRead,
+  getCountUnread,
 };

@@ -22,5 +22,3 @@ router
 // .delete(auth(), Permission(), addDeletedByToBody, validate(userValidation.deleteOne), userController.deleteOne);
 
 export const userRoute = router;
-
-

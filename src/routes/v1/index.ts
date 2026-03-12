@@ -7,6 +7,7 @@ import { transactionRoute } from '../../modules/transaction/transaction.route';
 // import { orderRoute } from '../../modules/order/order.route';
 import { notificationRoute } from '../../modules/notification/notification/notification.route';
 import { historyRoute } from '../../modules/notification/history/history.route';
+import { employeeRoute } from '../../modules/employee/employee.route';
 
 const router = express.Router();
 
@@ -24,9 +25,13 @@ const defaultRoutes: any[] = [
         route: attachmentRoute,
     },
     {
-        path: '/transaction',
-        route: transactionRoute,
+        path: '/employees',
+        route: employeeRoute,
     },
+    // {
+    //     path: '/transaction',
+    //     route: transactionRoute,
+    // },
     // {
     //     path: '/order',
     //     route: orderRoute,

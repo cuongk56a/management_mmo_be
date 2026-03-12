@@ -18,4 +18,8 @@ router.route('/change-password').patch(auth(), addUpdatedByIdToBody, validate(au
 router.route('/forgot-password').post(validate(authValidation.forgotPassword), authController.forgotPassword);
 router.route('/send-mail').post(validate(authValidation.sendMail), authController.sendMail);
 
+// Google OAuth
+router.get('/google', authController.loginGoogle);
+router.get('/google/callback', authController.loginGoogleCallback);
+
 export const authRoute = router;

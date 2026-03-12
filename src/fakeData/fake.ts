@@ -64,7 +64,7 @@ const fake = async () => {
         isAdmin: true
       },
       {
-        _id: adminTId,
+        _id: adminQId,
         CODE: 'QUANHH01',
         fullName: 'Admin Quân',
         description: faker.lorem.words(30),
