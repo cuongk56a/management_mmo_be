@@ -5,25 +5,25 @@ import {
     addDeletedByToBody,
     addUpdatedByIdToBody,
 } from '../../../middlewares/addUserToBody'
-import {validate} from '../../../middlewares/validate';
-import {notificationController} from './notification.controller';
-import {notificationValidation} from './notification.validation';
-import { Permission, SellerPermission } from '../../../middlewares/checkPermission';
+import { validate } from '../../../middlewares/validate';
+import { notificationController } from './notification.controller';
+import { notificationValidation } from './notification.validation';
+import { Permission } from '../../../middlewares/checkPermission';
 
 const router = express.Router()
 
 router
     .route('/')
-    .post(auth(), Permission(),addCreatedByIdToBody,validate(notificationValidation.createOne),notificationController.createOne)
-    .get(auth(), Permission(),validate(notificationValidation.getList),notificationController.getList);
+    .post(auth(), Permission.EmployeePermission(), addCreatedByIdToBody, validate(notificationValidation.createOne), notificationController.createOne)
+    .get(auth(), Permission.EmployeePermission(), validate(notificationValidation.getList), notificationController.getList);
 
-router.route('/all').get(auth(),validate(notificationValidation.getAll),notificationController.getAll);
+router.route('/all').get(auth(), validate(notificationValidation.getAll), notificationController.getAll);
 
 router
     .route('/:notificationId')
-    .get(auth(),Permission(),validate(notificationValidation.getOne), notificationController.getOne)
-    .patch(auth(), Permission(),addUpdatedByIdToBody, validate(notificationValidation.updateOne), notificationController.updateOne)
-    .delete(auth(), Permission(),addDeletedByToBody, validate(notificationValidation.deleteOne), notificationController.deleteOne);
+    .get(auth(), Permission.EmployeePermission(), validate(notificationValidation.getOne), notificationController.getOne)
+    .patch(auth(), Permission.EmployeePermission(), addUpdatedByIdToBody, validate(notificationValidation.updateOne), notificationController.updateOne)
+    .delete(auth(), Permission.EmployeePermission(), addDeletedByToBody, validate(notificationValidation.deleteOne), notificationController.deleteOne);
 
 export const notificationRoute = router;
 

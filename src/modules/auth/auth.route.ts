@@ -11,6 +11,7 @@ import { authValidation } from './auth.validation';
 
 const router = express.Router()
 
+router.route('/me').get(auth(), authController.me);
 router.route('/register').post(validate(authValidation.register), authController.register);
 router.route('/login').post(validate(authValidation.login), authController.login);
 router.route('/refresh').post(authController.refresh);

@@ -1,40 +1,33 @@
-import { Controller, Get, Post, Put, Delete, Route, Body, Query, Path, Tags, Security } from 'tsoa';
+import { NextFunction, Request, Response } from 'express';
+import httpStatus from 'http-status';
+import ApiError from '../../utils/core/ApiError';
+import { catchAsync } from '../../utils/core/catchAsync';
+import { pick } from '../../utils/core/pick';
 import { ReportService } from './report.service';
+import { sendOk } from '../../utils/core/response';
 
-@Route('reports')
-@Tags('Reports')
-@Security('jwt', ['ADMIN'])
-export class ReportController extends Controller {
-
-  /**
-   * Xem chi tiết báo cáo 1 tháng định sẵn. Sẽ tự động trích xuất / tổng kết mới nhất
-   * Gửi param YYYY-MM
-   */
-  @Get('monthly')
-  public async getMonthlyReport(
-    @Query() month?: string
-  ): Promise<any> {
-    await ReportService.generateMonthlyReport(month);
-
+const getMonthlyReport = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const { month } = pick(req.query, ['month']);
+  try {
+    await ReportService.generateMonthlyReport(month as string | undefined);
     const query = month ? { month } : {};
     const reports = await ReportService.getMonthlyReports(query);
-
-    return {
-      status: 'success',
-      data: { report: reports[0] }
-    };
+    return sendOk(res, { report: reports[0] }, 'OK');
+  } catch (error: any) {
+    return next(new ApiError(httpStatus.NOT_FOUND, error.message));
   }
+});
 
-  /**
-   * Xem lịch sử các báo cáo (dạng list các tháng cũ)
-   */
-  @Get('/')
-  public async getMonthlyReports(): Promise<any> {
-    const reports = await ReportService.getMonthlyReports({});
-    return {
-      status: 'success',
-      results: reports.length,
-      data: { reports }
-    };
+const getList = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const data = await ReportService.getMonthlyReports({});
+    return sendOk(res, data, 'OK');
+  } catch (error: any) {
+    return next(new ApiError(httpStatus.NOT_FOUND, error.message));
   }
-}
+});
+
+export const reportController = {
+  getMonthlyReport,
+  getList,
+};

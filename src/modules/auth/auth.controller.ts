@@ -12,22 +12,35 @@ import { IUserDoc } from '../user/user.type';
 import { genCode } from '../../utils/core/genCode';
 import console from 'console';
 import { RedisService } from '../../redis/RedisService';
+import { sendError, sendOk, sendResponse } from '../../utils/core/response';
 var jwt = require('jsonwebtoken');
+
+const me = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const user = await userService.getOne({ _id: req.userId });
+    if (!user) {
+      return sendError(res, httpStatus.NOT_FOUND, 'User not found!');
+    }
+    return sendOk(res, user, 'OK');
+  } catch (error: any) {
+    return next(new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message));
+  }
+});
 
 const register = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
   const { email, password, confirmPassword, fullName, phone, code } = req.body;
   try {
     let confirmCode = await getRedisCode(email);
     if (!confirmCode) {
-      return res.send({ code: httpStatus.BAD_REQUEST, status: 'Error', message: 'Code is not correct!' });
+      return sendError(res, httpStatus.BAD_REQUEST, 'Code is not correct!');
     }
     const user: IUserDoc | null = await userService.getOne({ email: email });
     if (!!user) {
-      return res.send({ code: httpStatus.BAD_REQUEST, status: 'Error', message: 'Email or phone number already exists!' });
+      return sendError(res, httpStatus.BAD_REQUEST, 'Email or phone number already exists!');
     } if (password !== confirmPassword) {
-      return res.send({ code: httpStatus.BAD_REQUEST, status: 'Error', message: 'Password and confirm password do not match!' });
-    } else if (confirmCode !== code) {
-      return res.send({ code: httpStatus.BAD_REQUEST, status: 'Error', message: 'Code is not correct!' });
+      return sendError(res, httpStatus.BAD_REQUEST, 'Password and confirm password do not match!');
+    } else if (confirmCode.toUpperCase() !== code.toUpperCase()) {
+      return sendError(res, httpStatus.BAD_REQUEST, 'Code is not correct!');
     } else {
       const hashedPassword = await hashPassword(password);
       const data: IUserDoc | null = await userService.createOne({
@@ -39,10 +52,10 @@ const register = catchAsync(async (req: Request, res: Response, next: NextFuncti
       if (!data) {
         throw new ApiError(httpStatus.NOT_FOUND, 'Not Found');
       }
-      return res.send({ code: httpStatus.OK, status: 'Success', message: 'Register successfully!' });
+      return sendOk(res, undefined, 'Register successfully!');
     }
   } catch (error: any) {
-    return next(new ApiError(httpStatus.NOT_FOUND, error.message));
+    return next(new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message));
   }
 });
 
@@ -51,7 +64,7 @@ const login = catchAsync(async (req: Request, res: Response, next: NextFunction)
   try {
     const user: IUserDoc | null = await userService.getOne({ email });
     if (!user) {
-      res.send({ code: httpStatus.NOT_FOUND, status: 'Error', message: 'Not Found User!' });
+      return sendError(res, httpStatus.BAD_REQUEST, 'Not Found User!');
     } else {
       const check = await checkPassword(password, user?.hashedPassword);
       if (check) {
@@ -67,13 +80,13 @@ const login = catchAsync(async (req: Request, res: Response, next: NextFunction)
           path: '/',
           maxAge: timeExpire,
         });
-        res.send({ code: httpStatus.OK, status: 'Success', message: 'Login successfully!', data: { user, token } });
+        return sendOk(res, { user, token }, 'Login successfully!');
       } else {
-        res.send({ code: httpStatus.BAD_REQUEST, status: 'Error', message: 'Email Or Password Not Incorrect!' });
+        return sendError(res, httpStatus.BAD_REQUEST, 'Email Or Password Not Incorrect!');
       }
     }
   } catch (error: any) {
-    return next(new ApiError(httpStatus.NOT_FOUND, error.message));
+    return next(new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message));
   }
 });
 
@@ -81,22 +94,22 @@ const refresh = catchAsync(async (req: Request, res: Response, next: NextFunctio
   try {
     const refreshToken = req.cookies['refresh_token'];
     if (!refreshToken) {
-      return res.send({ code: httpStatus.UNAUTHORIZED, status: 'Error', message: 'No refresh token provided!' });
+      return sendError(res, httpStatus.UNAUTHORIZED, 'No refresh token provided!');
     }
     let decoded: any;
     try {
       decoded = jwt.verify(refreshToken, appConfigs.jwt.secret);
     } catch (err: any) {
-      return res.send({ code: httpStatus.UNAUTHORIZED, status: 'Error', message: 'Refresh token is not correct!' });
+      return sendError(res, httpStatus.UNAUTHORIZED, 'Refresh token is not correct!');
     }
     const refreshTokenCache = await RedisService.getCachedRefreshToken(`refreshToken:${decoded.userId}`);
     if (refreshTokenCache !== refreshToken) {
-      return res.send({ code: httpStatus.UNAUTHORIZED, status: 'Error', message: 'Refresh token is not correct!' });
+      return sendError(res, httpStatus.UNAUTHORIZED, 'Refresh token is not correct!');
     }
     const user: IUserDoc | null = await userService.getOne({ _id: decoded.userId });
 
     if (!user) {
-      return res.send({ code: httpStatus.NOT_FOUND, status: 'Error', message: 'Not found user!' });
+      return sendError(res, httpStatus.NOT_FOUND, 'Not found user!');
     }
 
     const token = getNewToken({ userId: user.id });
@@ -113,11 +126,10 @@ const refresh = catchAsync(async (req: Request, res: Response, next: NextFunctio
       maxAge: timeExpire,
     });
 
-    return res.send({
+    return sendResponse(res, {
       code: httpStatus.OK,
-      status: 'Success',
       message: 'Token refreshed successfully!',
-      data: { user, token }
+      data: { user, token },
     });
 
   } catch (error: any) {
@@ -129,11 +141,11 @@ const changePassword = catchAsync(async (req: Request, res: Response, next: Next
   const { password, newPassword, cfNewPassword, updatedById, ...body } = req.body;
   try {
     if (newPassword !== cfNewPassword) {
-      res.send({ code: httpStatus.BAD_REQUEST, status: 'Error', message: 'New password and confirm password do not match!' });
+      return sendError(res, httpStatus.BAD_REQUEST, 'New password and confirm password do not match!');
     }
     const [user, hashedPassword] = await Promise.all([userService.getOne({ _id: updatedById }), hashPassword(newPassword)]);
     if (!user) {
-      res.send({ code: httpStatus.NOT_FOUND, status: 'Error', message: 'User not found!' });
+      return sendError(res, httpStatus.NOT_FOUND, 'User not found!');
     } else {
       const check = await checkPassword(password, user?.hashedPassword);
 
@@ -151,9 +163,9 @@ const changePassword = catchAsync(async (req: Request, res: Response, next: Next
             new: true,
           },
         );
-        res.send({ code: httpStatus.OK, status: 'Success', message: 'Change password success!' });
+        return sendOk(res, undefined, 'Change password success!');
       } else {
-        res.send({ code: httpStatus.BAD_REQUEST, status: 'Error', message: 'Password is not correct!' });
+        return sendError(res, httpStatus.BAD_REQUEST, 'Password is not correct!');
       }
     }
   } catch (error: any) {
@@ -166,10 +178,10 @@ const forgotPassword = catchAsync(async (req: Request, res: Response, next: Next
   try {
     const [confirmCode, newPassword] = await Promise.all([getRedisCode(email), genCode(3)]);
     if (!confirmCode) {
-      return res.send({ code: httpStatus.BAD_REQUEST, status: 'Error', message: 'Code is not correct!' });
+      return sendError(res, httpStatus.BAD_REQUEST, 'Code is not correct!');
     }
-    if (confirmCode !== code) {
-      return res.send({ code: httpStatus.BAD_REQUEST, status: 'Error', message: 'Code is not correct!' });
+    if (confirmCode.toUpperCase() !== code.toUpperCase()) {
+      return sendError(res, httpStatus.BAD_REQUEST, 'Code is not correct!');
     } else {
       const hashedPassword = await hashPassword(newPassword);
       await userService.updateOne(
@@ -203,7 +215,7 @@ const forgotPassword = catchAsync(async (req: Request, res: Response, next: Next
         } else {
           deleteRedisCode(email);
           console.log('Send Email Success! ' + info.response);
-          return res.send({ code: httpStatus.OK, status: 'Success', message: 'Password has been sent to your email!' });
+          return sendOk(res, undefined, 'Password has been sent to your email!');
         }
       });
     }
@@ -217,7 +229,7 @@ const sendMail = catchAsync(async (req: Request, res: Response, next: NextFuncti
     const { email } = req.body;
     const existingCode = await getRedisCode(email);
     if (existingCode) {
-      return res.send({ code: httpStatus.BAD_REQUEST, status: 'Error', message: 'Email has been sent!' });
+      return sendError(res, httpStatus.BAD_REQUEST, 'Email has been sent!');
     }
     const newCode = await setRedisCode(email);
     const transporter = nodemailer.createTransport({
@@ -239,9 +251,8 @@ const sendMail = catchAsync(async (req: Request, res: Response, next: NextFuncti
         deleteRedisCode(email);
         throw new ApiError(httpStatus.BAD_REQUEST, 'Send Email Error!')
       } else {
-        deleteRedisCode(email)
         console.log('Send Email Success! ' + info.response);
-        return res.send({ code: httpStatus.OK, status: 'Success', message: 'Send Email Success!' });
+        return sendOk(res, undefined, 'Send Email Success!');
       }
     });
   } catch (error: any) {
@@ -290,6 +301,7 @@ const loginGoogleCallback = (req: Request, res: Response, next: NextFunction) =>
 };
 
 export const authController = {
+  me,
   register,
   login,
   refresh,

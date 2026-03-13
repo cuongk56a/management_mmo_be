@@ -2,6 +2,7 @@ import httpStatus from 'http-status';
 import ApiError from '../utils/core/ApiError';
 import { appConfigs } from '../config/config';
 import logger from '../config/logger';
+import { sendResponse } from '../utils/core/response';
 
 export const errorConverter = (err: any, req: any, res: any, next: any) => {
   const myStatus: any = httpStatus
@@ -24,15 +25,14 @@ export const errorHandler = (err: any, req: any, res: any, next: any) => {
 
   res.locals.errorMessage = err.message;
 
-  const response = {
-    code: statusCode,
-    message,
-    ...(appConfigs.env === 'development' && { stack: err.stack }),
-  };
-
   if (appConfigs.env === 'development') {
     logger.error(err);
   }
 
-  res.status(statusCode).send(response);
+  return sendResponse(res, {
+    code: statusCode || httpStatus.INTERNAL_SERVER_ERROR,
+    status: 'Error',
+    message,
+    extra: appConfigs.env === 'development' ? { stack: err.stack } : undefined,
+  });
 };

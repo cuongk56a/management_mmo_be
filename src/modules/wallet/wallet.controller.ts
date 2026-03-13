@@ -1,94 +1,65 @@
-import { Controller, Get, Post, Put, Delete, Route, Body, Query, Path, Tags, Security, Request } from 'tsoa';
+import { NextFunction, Request, Response } from 'express';
+import httpStatus from 'http-status';
+import ApiError from '../../utils/core/ApiError';
+import { catchAsync } from '../../utils/core/catchAsync';
 import { WalletService } from './wallet.service';
+import { sendCreated, sendOk } from '../../utils/core/response';
 
-interface DepositBody {
-  amount: number;
-  currency?: 'USD' | 'VND';
-  method: 'bank' | 'admin';
-}
-
-interface WithdrawBody {
-  amount: number;
-  currency?: 'USD' | 'VND';
-}
-
-@Route('wallet')
-@Tags('Wallet')
-@Security('jwt')
-export class WalletController extends Controller {
-
-  /**
-   * Xem ví cá nhân
-   */
-  @Get('/')
-  public async getWallet(@Request() request: any): Promise<any> {
-    const user = (request as any).user;
-    const wallet = await WalletService.getWallet(user.id);
-    return {
-      status: 'success',
-      data: { wallet }
-    };
+const getWallet = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const data = await WalletService.getWallet(req.userId as string);
+    return sendOk(res, data, 'OK');
+  } catch (error: any) {
+    return next(new ApiError(httpStatus.NOT_FOUND, error.message));
   }
+});
 
-  /**
-   * KH Yêu cầu nạp tiền (hoặc Admin cấp tiền)
-   */
-  @Post('deposit')
-  public async createDeposit(
-    @Request() request: any,
-    @Body() body: DepositBody
-  ): Promise<any> {
-    const user = (request as any).user;
-    const deposit = await WalletService.createDeposit(body, user.id);
-    this.setStatus(201);
-    return {
-      status: 'success',
-      data: { deposit }
-    };
+const createDeposit = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const data = await WalletService.createDeposit(req.body, req.userId as string);
+    if (!data) {
+      throw new ApiError(httpStatus.NOT_FOUND, 'Not Found');
+    }
+    return sendCreated(res, data, 'Created');
+  } catch (error: any) {
+    return next(new ApiError(httpStatus.BAD_REQUEST, error.message));
   }
+});
 
-  /**
-   * Xem lịch sử nạp tiền
-   */
-  @Get('deposit-history')
-  public async getDepositHistory(@Request() request: any): Promise<any> {
-    const user = (request as any).user;
-    const deposits = await WalletService.getDepositHistory(user.id);
-    return {
-      status: 'success',
-      results: deposits.length,
-      data: { deposits }
-    };
+const getDepositHistory = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const data = await WalletService.getDepositHistory(req.userId as string);
+    return sendOk(res, data, 'OK');
+  } catch (error: any) {
+    return next(new ApiError(httpStatus.NOT_FOUND, error.message));
   }
+});
 
-  /**
-   * Yêu cầu rút tiền khỏi ví
-   */
-  @Post('withdraw')
-  public async createWithdraw(
-    @Request() request: any,
-    @Body() body: WithdrawBody
-  ): Promise<any> {
-    const user = (request as any).user;
-    const withdraw = await WalletService.createWithdraw(body, user.id);
-    this.setStatus(201);
-    return {
-      status: 'success',
-      data: { withdraw }
-    };
+const createWithdraw = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const data = await WalletService.createWithdraw(req.body, req.userId as string);
+    if (!data) {
+      throw new ApiError(httpStatus.NOT_FOUND, 'Not Found');
+    }
+    return sendCreated(res, data, 'Created');
+  } catch (error: any) {
+    return next(new ApiError(httpStatus.BAD_REQUEST, error.message));
   }
+});
 
-  /**
-   * Xem lịch sử rút tiền
-   */
-  @Get('withdraw-history')
-  public async getWithdrawHistory(@Request() request: any): Promise<any> {
-    const user = (request as any).user;
-    const withdraws = await WalletService.getWithdrawHistory(user.id);
-    return {
-      status: 'success',
-      results: withdraws.length,
-      data: { withdraws }
-    };
+const getWithdrawHistory = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const data = await WalletService.getWithdrawHistory(req.userId as string);
+    return sendOk(res, data, 'OK');
+  } catch (error: any) {
+    return next(new ApiError(httpStatus.NOT_FOUND, error.message));
   }
-}
+});
+
+export const walletController = {
+  getWallet,
+  createDeposit,
+  getDepositHistory,
+  createWithdraw,
+  getWithdrawHistory,
+};

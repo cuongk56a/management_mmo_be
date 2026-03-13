@@ -1,96 +1,76 @@
-import { Controller, Get, Post, Put, Delete, Route, Body, Query, Path, Tags, Security, Request as TsoaRequest } from 'tsoa';
+import { NextFunction, Request, Response } from 'express';
+import httpStatus from 'http-status';
+import ApiError from '../../utils/core/ApiError';
+import { catchAsync } from '../../utils/core/catchAsync';
+import { pick } from '../../utils/core/pick';
 import { ProductService } from './product.service';
+import { sendCreated, sendNoContent, sendOk } from '../../utils/core/response';
 
-interface ProductCreateBody {
-  name: string;
-  type: 'external' | 'internal';
-  costPrice: number;
-  sellPrice: number;
-  description?: string;
-  supplier?: string;
-}
-
-interface ProductUpdateBody {
-  name?: string;
-  type?: 'external' | 'internal';
-  costPrice?: number;
-  sellPrice?: number;
-  description?: string;
-  supplier?: string;
-}
-
-@Route('products')
-@Tags('Products')
-@Security('jwt')
-export class ProductController extends Controller {
-
-  /**
-   * Xem danh sách tất cả sản phẩm
-   */
-  @Get('/')
-  public async getProducts(
-    @Query() type?: string,
-    @Query() supplier?: string
-  ): Promise<{ status: string; results?: number; data: any }> {
-    const query: any = {};
-    if (type) query.type = type;
-    if (supplier) query.supplier = supplier;
-
-    const products = await ProductService.getProducts(query);
-    return {
-      status: 'success',
-      results: products.length,
-      data: { products }
-    };
+const createOne = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const data = await ProductService.createProduct(req.body);
+    if (!data) {
+      throw new ApiError(httpStatus.NOT_FOUND, 'Not Found');
+    }
+    return sendCreated(res, data, 'Created');
+  } catch (error: any) {
+    return next(new ApiError(httpStatus.BAD_REQUEST, error.message));
   }
+});
 
-  /**
-   * Tạo sản phẩm mới (chỉ Admin)
-   */
-  @Security('jwt', ['ADMIN'])
-  @Post('/')
-  public async createProduct(@Body() body: ProductCreateBody): Promise<any> {
-    const product = await ProductService.createProduct(body);
-    this.setStatus(201);
-    return {
-      status: 'success',
-      data: { product }
-    };
+const updateOne = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const { productId } = req.params;
+  try {
+    const data = await ProductService.updateProductById(productId, req.body);
+    if (!data) {
+      throw new ApiError(httpStatus.NOT_FOUND, 'Not Found');
+    }
+    return sendOk(res, data, 'OK');
+  } catch (error: any) {
+    return next(new ApiError(httpStatus.NOT_FOUND, error.message));
   }
+});
 
-  /**
-   * Xem chi tiết sản phẩm
-   */
-  @Get('{id}')
-  public async getProduct(@Path() id: string): Promise<any> {
-    const product = await ProductService.getProductById(id);
-    return {
-      status: 'success',
-      data: { product }
-    };
+const deleteOne = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const { productId } = req.params;
+  try {
+    const data = await ProductService.deleteProductById(productId);
+    if (!data) {
+      throw new ApiError(httpStatus.NOT_FOUND, 'Not Found');
+    }
+    return sendNoContent(res);
+  } catch (error: any) {
+    return next(new ApiError(httpStatus.NOT_FOUND, error.message));
   }
+});
 
-  /**
-   * Sửa sản phẩm (chỉ Admin)
-   */
-  @Security('jwt', ['ADMIN'])
-  @Put('{id}')
-  public async updateProduct(@Path() id: string, @Body() body: ProductUpdateBody): Promise<any> {
-    const product = await ProductService.updateProductById(id, body);
-    return {
-      status: 'success',
-      data: { product }
-    };
+const getOne = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const { productId } = req.params;
+  try {
+    const data = await ProductService.getProductById(productId);
+    if (!data) {
+      throw new ApiError(httpStatus.NOT_FOUND, 'Not Found');
+    }
+    return sendOk(res, data, 'OK');
+  } catch (error: any) {
+    return next(new ApiError(httpStatus.NOT_FOUND, error.message));
   }
+});
 
-  /**
-   * Xoá sản phẩm (chỉ Admin)
-   */
-  @Security('jwt', ['ADMIN'])
-  @Delete('{id}')
-  public async deleteProduct(@Path() id: string): Promise<any> {
-    await ProductService.deleteProductById(id);
-    this.setStatus(204);
-    return '';
+const getList = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const filter = pick(req.query, ['type', 'supplier']);
+  try {
+    const data = await ProductService.getProducts(filter);
+    return sendOk(res, data, 'OK');
+  } catch (error: any) {
+    return next(new ApiError(httpStatus.NOT_FOUND, error.message));
   }
-}
+});
+
+export const productController = {
+  createOne,
+  updateOne,
+  deleteOne,
+  getOne,
+  getList,
+};

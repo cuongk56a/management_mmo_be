@@ -5,6 +5,7 @@ import { catchAsync } from '../../utils/core/catchAsync';
 import { pick } from '../../utils/core/pick';
 import { EmployeeService } from './employee.service';
 import { getNewToken } from '../../config/passport';
+import { sendNoContent, sendOk } from '../../utils/core/response';
 
 const createOne = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -13,7 +14,7 @@ const createOne = catchAsync(async (req: Request, res: Response, next: NextFunct
         if (!data) {
             throw new ApiError(httpStatus.NOT_FOUND, 'Not Found');
         }
-        return res.send(data);
+        return sendOk(res, data, 'OK');
     } catch (error: any) {
         return next(new ApiError(httpStatus.NOT_FOUND, error.message));
     }
@@ -26,7 +27,7 @@ const updateOne = catchAsync(async (req: Request, res: Response, next: NextFunct
         if (!data) {
             throw new ApiError(httpStatus.NOT_FOUND, 'Not Found');
         }
-        return res.send(data);
+        return sendOk(res, data, 'OK');
     } catch (error: any) {
         return next(new ApiError(httpStatus.NOT_FOUND, error.message));
     }
@@ -39,7 +40,7 @@ const deleteOne = catchAsync(async (req: Request, res: Response, next: NextFunct
         if (!data) {
             throw new ApiError(httpStatus.NOT_FOUND, 'Not Found');
         }
-        res.status(httpStatus.NO_CONTENT).send();
+        return sendNoContent(res);
     } catch (error: any) {
         return next(new ApiError(httpStatus.NOT_FOUND, error.message));
     }
@@ -61,7 +62,7 @@ const getOne = catchAsync(async (req: Request, res: Response, next: NextFunction
         //     throw new ApiError(httpStatus.NOT_FOUND, 'Not Found');
         // }
         // res.send(data);
-        res.send("ok");
+        return sendOk(res, "ok", 'OK');
     } catch (error: any) {
         return next(new ApiError(httpStatus.NOT_FOUND, error.message));
     }
@@ -73,7 +74,7 @@ const getList = catchAsync(async (req: Request, res: Response, next: NextFunctio
     const queryOptions = pick(req.query, ['sort', 'limit', 'page']);
     try {
         const data = await EmployeeService.getList(filter, { ...queryOptions, options });
-        res.send(data);
+        return sendOk(res, data, 'OK');
     } catch (error: any) {
         return next(new ApiError(httpStatus.NOT_FOUND, error.message));
     }
@@ -84,7 +85,7 @@ const getAll = catchAsync(async (req: Request, res: Response, next: NextFunction
     const options = pick(req.query, ['hasAddress', 'hasOrganization', 'hasRole']);
     try {
         const data = await EmployeeService.getAll(filter, options);
-        res.send(data);
+        return sendOk(res, data, 'OK');
     } catch (error: any) {
         return next(new ApiError(httpStatus.NOT_FOUND, error.message));
     }

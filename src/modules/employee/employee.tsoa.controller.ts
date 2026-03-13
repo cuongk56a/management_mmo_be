@@ -19,7 +19,7 @@ interface EmployeeUpdateBody {
 @Route('employees')
 @Tags('Employees')
 @Security('jwt', ['ADMIN'])
-export class EmployeeController extends Controller {
+export class EmployeeTsoaController extends Controller {
 
   /**
    * Xem danh sách nhân viên

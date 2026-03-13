@@ -3,7 +3,7 @@ import { auth } from '../../middlewares/auth';
 import { addCreatedByIdToBody, addDeletedByToBody, addUpdatedByIdToBody } from '../../middlewares/addUserToBody';
 import { validate } from '../../middlewares/validate';
 import { employeeValidation } from './employee.validation';
-import { AdminPermission, Permission, SellerPermission } from '../../middlewares/checkPermission';
+import { Permission } from '../../middlewares/checkPermission';
 import { employeeController } from './employee.controller';
 
 const router = express.Router();
@@ -13,12 +13,12 @@ router
     // .post(auth(), Permission(), addCreatedByIdToBody, validate(employeeValidation.createOne), employeeController.createOne)
     .get(auth(), validate(employeeValidation.getList), employeeController.getList);
 
-router.route('/all').get(auth(), SellerPermission(), validate(employeeValidation.getAll), employeeController.getAll);
+router.route('/all').get(auth(), Permission.EmployeePermission(), validate(employeeValidation.getAll), employeeController.getAll);
 
 router
     .route('/:employeeId')
     .get(auth(), validate(employeeValidation.getOne), employeeController.getOne)
-    .patch(auth(), addUpdatedByIdToBody, validate(employeeValidation.updateEmployeeValidation), employeeController.updateOne);
-// .delete(auth(), Permission(), addDeletedByToBody, validate(employeeValidation.deleteOne), employeeController.deleteOne);
+    .patch(auth(), Permission.AdminPermission(), addUpdatedByIdToBody, validate(employeeValidation.updateEmployeeValidation), employeeController.updateOne);
+// .delete(auth(), Permission.AdminPermission(), addDeletedByToBody, validate(employeeValidation.deleteOne), employeeController.deleteOne);
 
 export const employeeRoute = router;

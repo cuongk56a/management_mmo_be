@@ -1,17 +1,15 @@
 import Joi from 'joi';
-import {customValidations} from '../../utils/validations/custom.validation';
+import { customValidations } from '../../utils/validations/custom.validation';
 import { UserGender } from './user.type';
 
 const createOne = {
   body: Joi.object().keys({
     phone: Joi.string().required(),
-    hashedPassword: Joi.string().required(),
     fullName: Joi.string().required(),
     email: Joi.string().required(),
     avatar: Joi.string().empty(''),
     birthday: Joi.string().empty(''),
     gender: Joi.string().valid(...Object.values(UserGender)).default(UserGender.OTHER),
-    addressId: Joi.string().custom(customValidations.objectId).empty(''),
     ...customValidations.createEntityValidation,
   }),
 };
@@ -25,7 +23,6 @@ const updateOne = {
     avatar: Joi.string().empty(''),
     birthday: Joi.string(),
     gender: Joi.string().valid(...Object.values(UserGender)),
-    addressId: Joi.string().custom(customValidations.objectId),
     ...customValidations.updateEntityValidation,
   }),
 };

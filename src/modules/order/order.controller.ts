@@ -1,52 +1,34 @@
-import { Controller, Get, Post, Put, Delete, Route, Body, Query, Path, Tags, Security, Request } from 'tsoa';
+import { NextFunction, Request, Response } from 'express';
+import httpStatus from 'http-status';
+import ApiError from '../../utils/core/ApiError';
+import { catchAsync } from '../../utils/core/catchAsync';
+import { pick } from '../../utils/core/pick';
 import { OrderService } from './order.service';
+import { sendCreated, sendOk } from '../../utils/core/response';
 
-interface OrderCreateBody {
-  customerId: string;
-  productId: string;
-  price: number;
-  currency?: 'USD' | 'VND';
-}
-
-@Route('orders')
-@Tags('Orders')
-@Security('jwt')
-export class OrderController extends Controller {
-
-  /**
-   * Xem danh sách đơn hàng
-   * Staff chỉ thấy đơn hàng của khách hàng do mình quản lý
-   */
-  @Get('/')
-  public async getOrders(
-    @Request() request: any,
-    @Query() status?: 'pending' | 'completed' | 'cancelled'
-  ): Promise<any> {
-    const user = (request as any).user;
-    const staffIdFilter = user.role === 'STAFF' ? user.employeeId : undefined;
-
-    const query: any = {};
-    if (status) query.status = status;
-
-    const orders = await OrderService.getOrders(query, staffIdFilter);
-    return {
-      status: 'success',
-      results: orders.length,
-      data: { orders }
-    };
+const createOne = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const data = await OrderService.createOrder(req.body);
+    if (!data) {
+      throw new ApiError(httpStatus.NOT_FOUND, 'Not Found');
+    }
+    return sendCreated(res, data, 'Created');
+  } catch (error: any) {
+    return next(new ApiError(httpStatus.BAD_REQUEST, error.message));
   }
+});
 
-  /**
-   * Tạo đơn hàng mới
-   */
-  @Security('jwt', ['ADMIN', 'STAFF'])
-  @Post('/')
-  public async createOrder(@Body() body: OrderCreateBody): Promise<any> {
-    const order = await OrderService.createOrder(body);
-    this.setStatus(201);
-    return {
-      status: 'success',
-      data: { order }
-    };
+const getList = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const filter = pick(req.query, ['status', 'staffId']);
+  try {
+    const data = await OrderService.getOrders(filter);
+    return sendOk(res, data, 'OK');
+  } catch (error: any) {
+    return next(new ApiError(httpStatus.NOT_FOUND, error.message));
   }
-}
+});
+
+export const orderController = {
+  createOne,
+  getList,
+};

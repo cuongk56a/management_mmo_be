@@ -1,16 +1,21 @@
 import Joi from 'joi';
 
-export const depositValidation = {
+const createDeposit = {
   body: Joi.object().keys({
     amount: Joi.number().min(1).required(),
     currency: Joi.string().valid('USD', 'VND').default('USD'),
-    method: Joi.string().valid('bank', 'admin').required()
+    method: Joi.string().valid('bank', 'admin').required(),
   }),
 };
 
-export const withdrawValidation = {
+const createWithdraw = {
   body: Joi.object().keys({
     amount: Joi.number().min(1).required(),
     currency: Joi.string().valid('USD', 'VND').default('USD'),
   }),
+};
+
+export const walletValidation = {
+  createDeposit,
+  createWithdraw,
 };

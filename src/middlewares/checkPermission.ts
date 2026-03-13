@@ -1,78 +1,73 @@
 import { Request, Response, NextFunction } from 'express';
-// import { roleService } from "../modules/role/role.service";
-const roleService: any = { getOne: async (filter: any) => null };
 import httpStatus from 'http-status';
-import { UserModel } from '../modules/user/user.model';
+import { userService } from '../modules/user/user.service';
+import { EmployeeService } from '../modules/employee/employee.service';
+import { ROLETYPE } from '../modules/employee/employee.type';
+import { sendError } from '../utils/core/response';
 
 export const AdminPermission = () => {
     return async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const [role, user] = await Promise.all([
-                roleService.getOne({_id: req.roleId}),
-                UserModel.findOne({_id: req.userId})
-            ]) 
+            const [employee, user] = await Promise.all([
+                EmployeeService.getOne({ _id: req.roleId }),
+                userService.getOne({ _id: req.userId })
+            ])
             req.isAdmin = user?.isAdmin || false
-            if ((!!role && role.isAdmin) || user?.isAdmin === true) {
+            if ((!!employee && employee.role === ROLETYPE.MANAGER && employee.isActive === true) || user?.isAdmin === true) {
                 next();
             } else {
-                return res.status(httpStatus.UNAUTHORIZED).send('Not Have Authorized!');
+                return sendError(res, httpStatus.FORBIDDEN, 'Not Have Authorized!');
             }
         } catch (error) {
-            return res.status(httpStatus.INTERNAL_SERVER_ERROR).send('Internal Server Error');
+            return sendError(res, httpStatus.INTERNAL_SERVER_ERROR, 'Internal Server Error');
         }
     };
 }
 
+export const EmployeePermission = () => {
+    return async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const [employee, user] = await Promise.all([
+                EmployeeService.getOne({ _id: req.roleId }),
+                userService.getOne({ _id: req.userId })
+            ])
+            req.isAdmin = user?.isAdmin || false
+            if ((!!employee && employee.isActive === true) || user?.isAdmin === true) {
+                next();
+            } else {
+                return sendError(res, httpStatus.FORBIDDEN, 'Not Have Authorized!');
+            }
+        } catch (error) {
+            return sendError(res, httpStatus.INTERNAL_SERVER_ERROR, 'Internal Server Error');
+        }
+    };
+}
+
+/**
+ * "Seller" hiện tại tương đương "Employee" (STAFF/MANAGER active) hoặc admin.
+ * Giữ export này để tương thích với các route đang import `SellerPermission`.
+ */
 export const SellerPermission = () => {
     return async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const [role, user] = await Promise.all([
-                roleService.getOne({_id: req.roleId}),
-                UserModel.findOne({_id: req.userId})
-            ]) 
+            const [employee, user] = await Promise.all([
+                EmployeeService.getOne({ _id: req.roleId }),
+                userService.getOne({ _id: req.userId })
+            ])
             req.isAdmin = user?.isAdmin || false
-            if ((!!role && (role.isSeller || role.isAdmin)) || user?.isAdmin === true) {
+            if ((!!employee && employee.isActive === true) || user?.isAdmin === true) {
                 next();
             } else {
-                return res.status(httpStatus.UNAUTHORIZED).send('Not Have Authorized!');
+                return sendError(res, httpStatus.FORBIDDEN, 'Not Have Authorized!');
             }
         } catch (error) {
-            return res.status(httpStatus.INTERNAL_SERVER_ERROR).send('Internal Server Error');
+            return sendError(res, httpStatus.INTERNAL_SERVER_ERROR, 'Internal Server Error');
         }
     };
 }
 
-export const DesignPermission = () => {
-    return async (req: Request, res: Response, next: NextFunction) => {
-        try {
-            const [role, user] = await Promise.all([
-                roleService.getOne({_id: req.roleId}),
-                UserModel.findOne({_id: req.userId})
-            ]) 
-            req.isAdmin = user?.isAdmin || false
-            if ((!!role && (role.isSeller || role.isAdmin || role.isDesign)) || user?.isAdmin === true) {
-                next();
-            } else {
-                return res.status(httpStatus.UNAUTHORIZED).send('Not Have Authorized!');
-            }
-        } catch (error) {
-            return res.status(httpStatus.INTERNAL_SERVER_ERROR).send('Internal Server Error');
-        }
-    };
-}
-
-export const Permission = () => {
-    return async (req: Request, res: Response, next: NextFunction) => {
-        try {
-            const user = await UserModel.findOne({_id: req.userId})
-            if (user?.isAdmin === true) {
-                req.isAdmin = user?.isAdmin
-                next();
-            } else {
-                return res.status(httpStatus.UNAUTHORIZED).send('Not Have Authorized!');
-            }
-        } catch (error) {
-            return res.status(httpStatus.INTERNAL_SERVER_ERROR).send('Internal Server Error');
-        }
-    };
+export const Permission = {
+    AdminPermission,
+    EmployeePermission,
+    SellerPermission,
 }

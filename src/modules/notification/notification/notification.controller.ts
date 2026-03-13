@@ -4,6 +4,7 @@ import ApiError from '../../../utils/core/ApiError';
 import {catchAsync} from '../../../utils/core/catchAsync';
 import {pick} from '../../../utils/core/pick';
 import {notificationService} from './notification.service';
+import { sendCreated, sendNoContent, sendOk } from '../../../utils/core/response';
 
 const createOne = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -11,7 +12,7 @@ const createOne = catchAsync(async (req: Request, res: Response, next: NextFunct
     if (!data) {
       throw new ApiError(httpStatus.NOT_FOUND, 'Not Found');
     }
-    res.send(data);
+    return sendCreated(res, data, 'Created');
   } catch (error: any) {
     return next(new ApiError(httpStatus.NOT_FOUND, error.message));
   }
@@ -24,7 +25,7 @@ const updateOne = catchAsync(async (req: Request, res: Response, next: NextFunct
     if (!data) {
       throw new ApiError(httpStatus.NOT_FOUND, 'Not Found');
     }
-    res.send(data);
+    return sendOk(res, data, 'OK');
   } catch (error: any) {
     return next(new ApiError(httpStatus.NOT_FOUND, error.message));
   }
@@ -37,7 +38,7 @@ const deleteOne = catchAsync(async (req: Request, res: Response, next: NextFunct
     if (!data) {
       throw new ApiError(httpStatus.NOT_FOUND, 'Not Found');
     }
-    res.status(httpStatus.NO_CONTENT).send();
+    return sendNoContent(res);
   } catch (error: any) {
     return next(new ApiError(httpStatus.NOT_FOUND, error.message));
   }
@@ -51,7 +52,7 @@ const getOne = catchAsync(async (req: Request, res: Response, next: NextFunction
     if (!data) {
       throw new ApiError(httpStatus.NOT_FOUND, 'Not Found');
     }
-    res.send(data);
+    return sendOk(res, data, 'OK');
   } catch (error: any) {
     return next(new ApiError(httpStatus.NOT_FOUND, error.message));
   }
@@ -62,7 +63,7 @@ const getList = catchAsync(async (req: Request, res: Response, next: NextFunctio
   const queryOptions = pick(req.query, ['limit', 'page']);
   try {
     const data = await notificationService.getList(filter, {...queryOptions});
-    res.send(data);
+    return sendOk(res, data, 'OK');
   } catch (error: any) {
     return next(new ApiError(httpStatus.NOT_FOUND, error.message));
   }
@@ -72,7 +73,7 @@ const getAll = catchAsync(async (req: Request, res: Response, next: NextFunction
   const filter = pick(req.query, ['search', 'isActive']);
   try {
     const data = await notificationService.getAll(filter);
-    res.send(data);
+    return sendOk(res, data, 'OK');
   } catch (error: any) {
     return next(new ApiError(httpStatus.NOT_FOUND, error.message));
   }

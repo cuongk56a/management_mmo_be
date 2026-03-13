@@ -22,8 +22,8 @@ router.route('/all').get(auth(), AdminPermission(), validate(transactionValidati
 router
     .route('/:transactionId')
     .get(auth(), AdminPermission(), validate(transactionValidation.getOne), transactionController.getOne)
-    .patch(auth(), Permission(), addUpdatedByIdToBody, validate(transactionValidation.updateOne), transactionController.updateOne)
-    .delete(auth(), Permission(), addDeletedByToBody, validate(transactionValidation.deleteOne), transactionController.deleteOne);
+    .patch(auth(), Permission.EmployeePermission(), addUpdatedByIdToBody, validate(transactionValidation.updateOne), transactionController.updateOne)
+    .delete(auth(), Permission.EmployeePermission(), addDeletedByToBody, validate(transactionValidation.deleteOne), transactionController.deleteOne);
 
 export const transactionRoute = router;
 

@@ -4,6 +4,7 @@ import ApiError from '../../utils/core/ApiError';
 import {catchAsync} from '../../utils/core/catchAsync';
 import {pick} from '../../utils/core/pick';
 import {transactionService} from './transaction.service';
+import { sendCreated, sendNoContent, sendOk } from '../../utils/core/response';
 
 const createOne = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -11,7 +12,7 @@ const createOne = catchAsync(async (req: Request, res: Response, next: NextFunct
     if (!data) {
       throw new ApiError(httpStatus.NOT_FOUND, 'Not Found');
     }
-    res.send(data);
+    return sendCreated(res, data, 'Created');
   } catch (error: any) {
     return next(new ApiError(httpStatus.NOT_FOUND, error.message));
   }
@@ -24,7 +25,7 @@ const updateOne = catchAsync(async (req: Request, res: Response, next: NextFunct
     if (!data) {
       throw new ApiError(httpStatus.NOT_FOUND, 'Not Found');
     }
-    res.send(data);
+    return sendOk(res, data, 'OK');
   } catch (error: any) {
     return next(new ApiError(httpStatus.NOT_FOUND, error.message));
   }
@@ -37,7 +38,7 @@ const deleteOne = catchAsync(async (req: Request, res: Response, next: NextFunct
     if (!data) {
       throw new ApiError(httpStatus.NOT_FOUND, 'Not Found');
     }
-    res.status(httpStatus.NO_CONTENT).send();
+    return sendNoContent(res);
   } catch (error: any) {
     return next(new ApiError(httpStatus.NOT_FOUND, error.message));
   }
@@ -51,7 +52,7 @@ const getOne = catchAsync(async (req: Request, res: Response, next: NextFunction
     if (!data) {
       throw new ApiError(httpStatus.NOT_FOUND, 'Not Found');
     }
-    res.send(data);
+    return sendOk(res, data, 'OK');
   } catch (error: any) {
     return next(new ApiError(httpStatus.NOT_FOUND, error.message));
   }
@@ -63,7 +64,7 @@ const getList = catchAsync(async (req: Request, res: Response, next: NextFunctio
   const options = pick(req.query, ['hasTarget','hasShop',  'hasCreatedBy',  'hasUpdatedBy']);
   try {
     const data = await transactionService.getList(filter, {...queryOptions, options});
-    res.send(data);
+    return sendOk(res, data, 'OK');
   } catch (error: any) {
     return next(new ApiError(httpStatus.NOT_FOUND, error.message));
   }
@@ -74,7 +75,7 @@ const getAll = catchAsync(async (req: Request, res: Response, next: NextFunction
   const options = pick(req.query, ['hasTarget','hasShop',  'hasCreatedBy',  'hasUpdatedBy']);
   try {
     const data = await transactionService.getAll(filter, options);
-    res.send(data);
+    return sendOk(res, data, 'OK');
   } catch (error: any) {
     return next(new ApiError(httpStatus.NOT_FOUND, error.message));
   }

@@ -1,24 +1,29 @@
 import { QueryOptions } from 'mongoose';
-import {UserModel} from './user.model';
-import {IUserDoc} from './user.type';
+import { UserModel } from './user.model';
+import { IUserDoc } from './user.type';
 
 const createOne = async (body: any): Promise<IUserDoc | null> => {
-  return UserModel.create(body);
+  const user = await UserModel.create(body);
+  return user;
 };
 
 const updateOne = async (filter: any, body: any, options?: QueryOptions): Promise<IUserDoc | null> => {
   return UserModel.findOneAndUpdate(
     {
-      deletedById: {$exists: false},
+      deletedById: { $exists: false },
       ...filter,
     },
     body,
-    {new: true, ...options},
+    { new: true, ...options },
   ) as any;
 };
 
 const deleteOne = async (filter: any): Promise<IUserDoc | null> => {
   return UserModel.findOneAndDelete(filter);
+};
+
+const softDelete = async (filter: any): Promise<IUserDoc | null> => {
+  return UserModel.findOneAndUpdate(filter, { deletedById: filter._id }, { new: true }) as any;
 };
 
 const getOne = async (filter: any, options?: any): Promise<IUserDoc | null> => {
@@ -29,20 +34,20 @@ const getList = async (filter: any, options?: any): Promise<IUserDoc[]> => {
   return UserModel.paginate(
     {
       ...filter,
-      deletedById: {$exists: false},
+      deletedById: { $exists: false },
     },
-    {sort: {createdAt: -1}, ...options},
+    { sort: { createdAt: -1 }, ...options },
   ) as any;
 };
 
 const getAll = async (filter: any, options?: any): Promise<IUserDoc[]> => {
   return UserModel.find(
     {
-      deletedById: {$exists: false},
+      deletedById: { $exists: false },
       ...filter,
     },
     undefined,
-    {sort: {createdAt: -1}, ...options},
+    { sort: { createdAt: -1 }, ...options },
   ) as any;
 };
 
@@ -53,4 +58,5 @@ export const userService = {
   getOne,
   getAll,
   getList,
+  softDelete,
 };

@@ -4,12 +4,13 @@ import ApiError from '../../../utils/core/ApiError';
 import { catchAsync } from '../../../utils/core/catchAsync';
 import { pick } from '../../../utils/core/pick';
 import { historyService } from './history.service';
+import { sendCreated, sendNoContent, sendOk } from '../../../utils/core/response';
 
 const createOne = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
   try {
     const data = await historyService.createOne(req.body);
     if (!data) throw new ApiError(httpStatus.NOT_FOUND, 'Not Found');
-    res.send(data);
+    return sendCreated(res, data, 'Created');
   } catch (error: any) {
     return next(new ApiError(httpStatus.BAD_REQUEST, error.message));
   }
@@ -29,7 +30,7 @@ const markAsRead = catchAsync(async (req: Request, res: Response, next: NextFunc
 
     // Nếu đã đọc rồi thì trả về luôn, không update lại
     if (history.readAt) {
-      return res.send(history);
+      return sendOk(res, history, 'OK');
     }
 
     const updated = await historyService.updateOne(
@@ -40,7 +41,7 @@ const markAsRead = catchAsync(async (req: Request, res: Response, next: NextFunc
       },
     );
 
-    res.send(updated);
+    return sendOk(res, updated, 'OK');
   } catch (error: any) {
     return next(new ApiError(httpStatus.BAD_REQUEST, error.message));
   }
@@ -62,7 +63,7 @@ const markAllAsRead = catchAsync(async (req: Request, res: Response, next: NextF
       { isRead: true, readAt: now },
     );
 
-    res.send({ success: true, message: 'Đã đánh dấu tất cả thông báo là đã đọc' });
+    return sendOk(res, undefined, 'Đã đánh dấu tất cả thông báo là đã đọc');
   } catch (error: any) {
     return next(new ApiError(httpStatus.BAD_REQUEST, error.message));
   }
@@ -73,7 +74,7 @@ const deleteOne = catchAsync(async (req: Request, res: Response, next: NextFunct
   try {
     const data = await historyService.updateOne({ _id: historyId }, req.body);
     if (!data) throw new ApiError(httpStatus.NOT_FOUND, 'Not Found');
-    res.status(httpStatus.NO_CONTENT).send();
+    return sendNoContent(res);
   } catch (error: any) {
     return next(new ApiError(httpStatus.NOT_FOUND, error.message));
   }
@@ -85,7 +86,7 @@ const getOne = catchAsync(async (req: Request, res: Response, next: NextFunction
   try {
     const data = await historyService.getOne({ _id: historyId }, options);
     if (!data) throw new ApiError(httpStatus.NOT_FOUND, 'Not Found');
-    res.send(data);
+    return sendOk(res, data, 'OK');
   } catch (error: any) {
     return next(new ApiError(httpStatus.NOT_FOUND, error.message));
   }
@@ -97,7 +98,7 @@ const getList = catchAsync(async (req: Request, res: Response, next: NextFunctio
   const populateOptions = pick(req.query, ['hasNotification', 'hasUser']);
   try {
     const data = await historyService.getList(filter, { ...queryOptions, ...populateOptions });
-    res.send(data);
+    return sendOk(res, data, 'OK');
   } catch (error: any) {
     return next(new ApiError(httpStatus.BAD_REQUEST, error.message));
   }
@@ -108,7 +109,7 @@ const getAll = catchAsync(async (req: Request, res: Response, next: NextFunction
   const options = pick(req.query, ['hasNotification', 'hasUser']);
   try {
     const data = await historyService.getAll(filter, options);
-    res.send(data);
+    return sendOk(res, data, 'OK');
   } catch (error: any) {
     return next(new ApiError(httpStatus.BAD_REQUEST, error.message));
   }
@@ -123,7 +124,7 @@ const getCountUnread = catchAsync(async (req: Request, res: Response, next: Next
   try {
     if (!userId) throw new ApiError(httpStatus.BAD_REQUEST, 'userId is required');
     const count = await historyService.getCountUnread(String(userId));
-    res.send({ count });
+    return sendOk(res, { count }, 'OK');
   } catch (error: any) {
     return next(new ApiError(httpStatus.BAD_REQUEST, error.message));
   }

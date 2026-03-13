@@ -807,7 +807,7 @@
 				}
 			}
 		},
-		"/reports/monthly": {
+		"/report/monthly": {
 			"get": {
 				"operationId": "GetMonthlyReport",
 				"responses": {
@@ -822,7 +822,7 @@
 				},
 				"description": "Xem chi tiết báo cáo 1 tháng định sẵn. Sẽ tự động trích xuất / tổng kết mới nhất\nGửi param YYYY-MM",
 				"tags": [
-					"Reports"
+					"Report"
 				],
 				"security": [
 					{
@@ -843,9 +843,9 @@
 				]
 			}
 		},
-		"/reports": {
+		"/report": {
 			"get": {
-				"operationId": "GetMonthlyReports",
+				"operationId": "GetList",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -858,7 +858,7 @@
 				},
 				"description": "Xem lịch sử các báo cáo (dạng list các tháng cũ)",
 				"tags": [
-					"Reports"
+					"Report"
 				],
 				"security": [
 					{
@@ -870,38 +870,22 @@
 				"parameters": []
 			}
 		},
-		"/products": {
+		"/product": {
 			"get": {
-				"operationId": "GetProducts",
+				"operationId": "GetList",
 				"responses": {
 					"200": {
 						"description": "Ok",
 						"content": {
 							"application/json": {
-								"schema": {
-									"properties": {
-										"data": {},
-										"results": {
-											"type": "number",
-											"format": "double"
-										},
-										"status": {
-											"type": "string"
-										}
-									},
-									"required": [
-										"data",
-										"status"
-									],
-									"type": "object"
-								}
+								"schema": {}
 							}
 						}
 					}
 				},
 				"description": "Xem danh sách tất cả sản phẩm",
 				"tags": [
-					"Products"
+					"Product"
 				],
 				"security": [
 					{
@@ -928,7 +912,7 @@
 				]
 			},
 			"post": {
-				"operationId": "CreateProduct",
+				"operationId": "CreateOne",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -941,7 +925,7 @@
 				},
 				"description": "Tạo sản phẩm mới (chỉ Admin)",
 				"tags": [
-					"Products"
+					"Product"
 				],
 				"security": [
 					{
@@ -963,9 +947,9 @@
 				}
 			}
 		},
-		"/products/{id}": {
+		"/product/{productId}": {
 			"get": {
-				"operationId": "GetProduct",
+				"operationId": "GetOne",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -978,7 +962,7 @@
 				},
 				"description": "Xem chi tiết sản phẩm",
 				"tags": [
-					"Products"
+					"Product"
 				],
 				"security": [
 					{
@@ -988,7 +972,7 @@
 				"parameters": [
 					{
 						"in": "path",
-						"name": "id",
+						"name": "productId",
 						"required": true,
 						"schema": {
 							"type": "string"
@@ -997,7 +981,7 @@
 				]
 			},
 			"put": {
-				"operationId": "UpdateProduct",
+				"operationId": "UpdateOne",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -1010,7 +994,7 @@
 				},
 				"description": "Sửa sản phẩm (chỉ Admin)",
 				"tags": [
-					"Products"
+					"Product"
 				],
 				"security": [
 					{
@@ -1022,7 +1006,7 @@
 				"parameters": [
 					{
 						"in": "path",
-						"name": "id",
+						"name": "productId",
 						"required": true,
 						"schema": {
 							"type": "string"
@@ -1041,7 +1025,7 @@
 				}
 			},
 			"delete": {
-				"operationId": "DeleteProduct",
+				"operationId": "DeleteOne",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -1054,7 +1038,7 @@
 				},
 				"description": "Xoá sản phẩm (chỉ Admin)",
 				"tags": [
-					"Products"
+					"Product"
 				],
 				"security": [
 					{
@@ -1066,7 +1050,7 @@
 				"parameters": [
 					{
 						"in": "path",
-						"name": "id",
+						"name": "productId",
 						"required": true,
 						"schema": {
 							"type": "string"
@@ -1075,9 +1059,9 @@
 				]
 			}
 		},
-		"/orders": {
+		"/order": {
 			"get": {
-				"operationId": "GetOrders",
+				"operationId": "GetList",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -1090,7 +1074,7 @@
 				},
 				"description": "Xem danh sách đơn hàng\nStaff chỉ thấy đơn hàng của khách hàng do mình quản lý",
 				"tags": [
-					"Orders"
+					"Order"
 				],
 				"security": [
 					{
@@ -1110,11 +1094,19 @@
 								"cancelled"
 							]
 						}
+					},
+					{
+						"in": "query",
+						"name": "staffId",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
 					}
 				]
 			},
 			"post": {
-				"operationId": "CreateOrder",
+				"operationId": "CreateOne",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -1127,7 +1119,7 @@
 				},
 				"description": "Tạo đơn hàng mới",
 				"tags": [
-					"Orders"
+					"Order"
 				],
 				"security": [
 					{
@@ -1150,9 +1142,9 @@
 				}
 			}
 		},
-		"/expenses": {
+		"/expense": {
 			"get": {
-				"operationId": "GetExpenses",
+				"operationId": "GetList",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -1165,7 +1157,7 @@
 				},
 				"description": "Xem danh sách chi tiêu công ty",
 				"tags": [
-					"Expenses"
+					"Expense"
 				],
 				"security": [
 					{
@@ -1177,7 +1169,7 @@
 				"parameters": []
 			},
 			"post": {
-				"operationId": "CreateExpense",
+				"operationId": "CreateOne",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -1190,7 +1182,7 @@
 				},
 				"description": "Tạo chi tiêu mới",
 				"tags": [
-					"Expenses"
+					"Expense"
 				],
 				"security": [
 					{
@@ -1401,9 +1393,9 @@
 				]
 			}
 		},
-		"/customers": {
+		"/customer": {
 			"get": {
-				"operationId": "GetCustomers",
+				"operationId": "GetList",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -1414,9 +1406,9 @@
 						}
 					}
 				},
-				"description": "Xem danh sách khách hàng\nStaff chỉ thấy khách hàng của mình",
+				"description": "Xem danh sách khách hàng",
 				"tags": [
-					"Customers"
+					"Customer"
 				],
 				"security": [
 					{
@@ -1443,7 +1435,7 @@
 				]
 			},
 			"post": {
-				"operationId": "CreateCustomer",
+				"operationId": "CreateOne",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -1456,7 +1448,7 @@
 				},
 				"description": "Tạo khách hàng mới",
 				"tags": [
-					"Customers"
+					"Customer"
 				],
 				"security": [
 					{
@@ -1479,9 +1471,9 @@
 				}
 			}
 		},
-		"/customers/{id}": {
+		"/customer/{customerId}": {
 			"get": {
-				"operationId": "GetCustomer",
+				"operationId": "GetOne",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -1494,7 +1486,7 @@
 				},
 				"description": "Xem thông tin một khách hàng",
 				"tags": [
-					"Customers"
+					"Customer"
 				],
 				"security": [
 					{
@@ -1504,7 +1496,7 @@
 				"parameters": [
 					{
 						"in": "path",
-						"name": "id",
+						"name": "customerId",
 						"required": true,
 						"schema": {
 							"type": "string"
@@ -1513,7 +1505,7 @@
 				]
 			},
 			"put": {
-				"operationId": "UpdateCustomer",
+				"operationId": "UpdateOne",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -1526,7 +1518,7 @@
 				},
 				"description": "Cập nhật thông tin khách hàng",
 				"tags": [
-					"Customers"
+					"Customer"
 				],
 				"security": [
 					{
@@ -1539,7 +1531,7 @@
 				"parameters": [
 					{
 						"in": "path",
-						"name": "id",
+						"name": "customerId",
 						"required": true,
 						"schema": {
 							"type": "string"
@@ -1558,7 +1550,7 @@
 				}
 			},
 			"delete": {
-				"operationId": "DeleteCustomer",
+				"operationId": "DeleteOne",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -1571,7 +1563,7 @@
 				},
 				"description": "Xoá khách hàng (Chỉ Admin)",
 				"tags": [
-					"Customers"
+					"Customer"
 				],
 				"security": [
 					{
@@ -1583,13 +1575,37 @@
 				"parameters": [
 					{
 						"in": "path",
-						"name": "id",
+						"name": "customerId",
 						"required": true,
 						"schema": {
 							"type": "string"
 						}
 					}
 				]
+			}
+		},
+		"/auth/me": {
+			"get": {
+				"operationId": "Me",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Auth"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": []
 			}
 		},
 		"/auth/register": {

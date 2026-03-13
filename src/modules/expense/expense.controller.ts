@@ -1,41 +1,32 @@
-import { Controller, Get, Post, Put, Delete, Route, Body, Query, Path, Tags, Security } from 'tsoa';
+import { NextFunction, Request, Response } from 'express';
+import httpStatus from 'http-status';
+import ApiError from '../../utils/core/ApiError';
+import { catchAsync } from '../../utils/core/catchAsync';
 import { ExpenseService } from './expense.service';
+import { sendCreated, sendOk } from '../../utils/core/response';
 
-interface ExpenseCreateBody {
-  name: string;
-  amount: number;
-  currency?: 'USD' | 'VND';
-  source: string;
-}
-
-@Route('expenses')
-@Tags('Expenses')
-@Security('jwt', ['ADMIN'])
-export class ExpenseController extends Controller {
-
-  /**
-   * Xem danh sách chi tiêu công ty
-   */
-  @Get('/')
-  public async getExpenses(): Promise<any> {
-    const expenses = await ExpenseService.getExpenses({});
-    return {
-      status: 'success',
-      results: expenses.length,
-      data: { expenses }
-    };
+const createOne = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const data = await ExpenseService.createExpense(req.body);
+    if (!data) {
+      throw new ApiError(httpStatus.NOT_FOUND, 'Not Found');
+    }
+    return sendCreated(res, data, 'Created');
+  } catch (error: any) {
+    return next(new ApiError(httpStatus.BAD_REQUEST, error.message));
   }
+});
 
-  /**
-   * Tạo chi tiêu mới
-   */
-  @Post('/')
-  public async createExpense(@Body() body: ExpenseCreateBody): Promise<any> {
-    const expense = await ExpenseService.createExpense(body);
-    this.setStatus(201);
-    return {
-      status: 'success',
-      data: { expense }
-    };
+const getList = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const data = await ExpenseService.getExpenses({});
+    return sendOk(res, data, 'OK');
+  } catch (error: any) {
+    return next(new ApiError(httpStatus.NOT_FOUND, error.message));
   }
-}
+});
+
+export const expenseController = {
+  createOne,
+  getList,
+};

@@ -1,4 +1,4 @@
-import { Controller, Post, Patch, Route, Body, Tags, Security } from 'tsoa';
+import { Controller, Post, Patch, Route, Body, Tags, Security, Get } from 'tsoa';
 
 interface RegisterBody {
     email: string;
@@ -36,6 +36,13 @@ interface SendMailBody {
 @Route('auth')
 @Tags('Auth')
 export class AuthTsoaController extends Controller {
+
+    @Security('jwt')
+    @Get('me')
+    public async me(): Promise<any> {
+        return;
+    }
+
     /**
      * Đăng ký tài khoản mới
      */
