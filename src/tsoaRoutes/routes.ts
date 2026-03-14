@@ -129,14 +129,23 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ROLETYPE.MANAGER": {
+        "dataType": "refEnum",
+        "enums": ["MANAGER"],
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ROLETYPE.STAFF": {
+        "dataType": "refEnum",
+        "enums": ["STAFF"],
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "EmployeeCreateBody": {
         "dataType": "refObject",
         "properties": {
             "userId": {"dataType":"string","required":true},
-            "name": {"dataType":"string","required":true},
-            "email": {"dataType":"string","required":true},
-            "role": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["ADMIN"]},{"dataType":"enum","enums":["STAFF"]}],"required":true},
+            "role": {"dataType":"union","subSchemas":[{"ref":"ROLETYPE.MANAGER"},{"ref":"ROLETYPE.STAFF"}],"required":true},
             "commissionRate": {"dataType":"double"},
+            "isActive": {"dataType":"boolean"},
         },
         "additionalProperties": false,
     },
@@ -144,10 +153,9 @@ const models: TsoaRoute.Models = {
     "EmployeeUpdateBody": {
         "dataType": "refObject",
         "properties": {
-            "name": {"dataType":"string"},
-            "email": {"dataType":"string"},
-            "role": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["ADMIN"]},{"dataType":"enum","enums":["STAFF"]}]},
+            "role": {"dataType":"union","subSchemas":[{"ref":"ROLETYPE.MANAGER"},{"ref":"ROLETYPE.STAFF"}]},
             "commissionRate": {"dataType":"double"},
+            "isActive": {"dataType":"boolean"},
         },
         "additionalProperties": false,
     },
@@ -897,7 +905,8 @@ export function RegisterRoutes(app: Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsEmployeeTsoaController_getEmployees: Record<string, TsoaRoute.ParameterSchema> = {
-                role: {"in":"query","name":"role","dataType":"union","subSchemas":[{"dataType":"enum","enums":["ADMIN"]},{"dataType":"enum","enums":["STAFF"]}]},
+                role: {"in":"query","name":"role","dataType":"union","subSchemas":[{"ref":"ROLETYPE.MANAGER"},{"ref":"ROLETYPE.STAFF"}]},
+                isActive: {"in":"query","name":"isActive","dataType":"boolean"},
         };
         app.get('/v1/employees',
             authenticateMiddleware([{"jwt":["ADMIN"]}]),

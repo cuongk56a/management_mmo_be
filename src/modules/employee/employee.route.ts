@@ -10,7 +10,7 @@ const router = express.Router();
 
 router
     .route('/')
-    // .post(auth(), Permission(), addCreatedByIdToBody, validate(employeeValidation.createOne), employeeController.createOne)
+    .post(auth(), Permission.AdminPermission(), addCreatedByIdToBody, validate(employeeValidation.createEmployeeValidation), employeeController.createOne)
     .get(auth(), validate(employeeValidation.getList), employeeController.getList);
 
 router.route('/all').get(auth(), Permission.EmployeePermission(), validate(employeeValidation.getAll), employeeController.getAll);

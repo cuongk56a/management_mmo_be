@@ -244,33 +244,43 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"ROLETYPE.MANAGER": {
+				"enum": [
+					"MANAGER"
+				],
+				"type": "string"
+			},
+			"ROLETYPE.STAFF": {
+				"enum": [
+					"STAFF"
+				],
+				"type": "string"
+			},
 			"EmployeeCreateBody": {
 				"properties": {
 					"userId": {
 						"type": "string"
 					},
-					"name": {
-						"type": "string"
-					},
-					"email": {
-						"type": "string"
-					},
 					"role": {
-						"type": "string",
-						"enum": [
-							"ADMIN",
-							"STAFF"
+						"anyOf": [
+							{
+								"$ref": "#/components/schemas/ROLETYPE.MANAGER"
+							},
+							{
+								"$ref": "#/components/schemas/ROLETYPE.STAFF"
+							}
 						]
 					},
 					"commissionRate": {
 						"type": "number",
 						"format": "double"
+					},
+					"isActive": {
+						"type": "boolean"
 					}
 				},
 				"required": [
 					"userId",
-					"name",
-					"email",
 					"role"
 				],
 				"type": "object",
@@ -278,22 +288,22 @@
 			},
 			"EmployeeUpdateBody": {
 				"properties": {
-					"name": {
-						"type": "string"
-					},
-					"email": {
-						"type": "string"
-					},
 					"role": {
-						"type": "string",
-						"enum": [
-							"ADMIN",
-							"STAFF"
+						"anyOf": [
+							{
+								"$ref": "#/components/schemas/ROLETYPE.MANAGER"
+							},
+							{
+								"$ref": "#/components/schemas/ROLETYPE.STAFF"
+							}
 						]
 					},
 					"commissionRate": {
 						"type": "number",
 						"format": "double"
+					},
+					"isActive": {
+						"type": "boolean"
 					}
 				},
 				"type": "object",
@@ -1233,12 +1243,14 @@
 						"in": "query",
 						"name": "role",
 						"required": false,
+						"schema": {}
+					},
+					{
+						"in": "query",
+						"name": "isActive",
+						"required": false,
 						"schema": {
-							"type": "string",
-							"enum": [
-								"ADMIN",
-								"STAFF"
-							]
+							"type": "boolean"
 						}
 					}
 				]

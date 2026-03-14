@@ -1,13 +1,14 @@
 import Joi from 'joi';
 import { customValidations } from '../../utils/validations/custom.validation';
+import { ROLETYPE } from './employee.type';
 
 const createEmployeeValidation = {
   body: Joi.object().keys({
     userId: Joi.string().required(),
-    name: Joi.string().required(),
-    email: Joi.string().email().required(),
-    role: Joi.string().valid('ADMIN', 'STAFF').required(),
-    commissionRate: Joi.number().min(0).max(1).default(0),
+    role: Joi.string().valid(...Object.values(ROLETYPE)).required(),
+    commissionRate: Joi.number().min(0).max(100).default(0),
+    isActive: Joi.boolean().default(true),
+    ...customValidations.createEntityValidation,
   }),
 };
 
@@ -16,10 +17,10 @@ const updateEmployeeValidation = {
     id: Joi.string().required(),
   }),
   body: Joi.object().keys({
-    name: Joi.string(),
-    email: Joi.string().email(),
-    role: Joi.string().valid('ADMIN', 'STAFF'),
-    commissionRate: Joi.number().min(0).max(1),
+    role: Joi.string().valid(...Object.values(ROLETYPE)),
+    commissionRate: Joi.number().min(0).max(100),
+    isActive: Joi.boolean(),
+    ...customValidations.updateEntityValidation,
   }).min(1),
 };
 
@@ -28,19 +29,14 @@ const getOne = {
     userId: Joi.string().custom(customValidations.objectId).required(),
   }),
   query: Joi.object().keys({
-    hasAddress: Joi.boolean(),
-    hasRole: Joi.boolean(),
+    hasUser: Joi.boolean(),
   }),
 };
 
 const getList = {
   query: Joi.object().keys({
-    phone: Joi.string().empty(''),
-    email: Joi.string().empty(''),
     search: Joi.string().empty(''),
-    hasAddress: Joi.boolean(),
-    hasRole: Joi.boolean(),
-    isAdmin: Joi.boolean(),
+    hasUser: Joi.boolean(),
     ...customValidations.paginateValidation,
   }),
 };
@@ -48,12 +44,8 @@ const getList = {
 
 const getAll = {
   query: Joi.object().keys({
-    phone: Joi.string().empty(''),
-    email: Joi.string().empty(''),
     search: Joi.string().empty(''),
-    hasAddress: Joi.boolean(),
-    hasRole: Joi.boolean(),
-    isAdmin: Joi.boolean(),
+    hasUser: Joi.boolean(),
   }),
 };
 

@@ -1,19 +1,18 @@
 import { Controller, Get, Post, Put, Delete, Route, Body, Query, Path, Tags, Security } from 'tsoa';
 import { EmployeeService } from './employee.service';
+import { ROLETYPE } from './employee.type';
 
 interface EmployeeCreateBody {
   userId: string;
-  name: string;
-  email: string;
-  role: 'ADMIN' | 'STAFF';
+  role: ROLETYPE.MANAGER | ROLETYPE.STAFF;
   commissionRate?: number;
+  isActive?: boolean;
 }
 
 interface EmployeeUpdateBody {
-  name?: string;
-  email?: string;
-  role?: 'ADMIN' | 'STAFF';
+  role?: ROLETYPE.MANAGER | ROLETYPE.STAFF;
   commissionRate?: number;
+  isActive?: boolean;
 }
 
 @Route('employees')
@@ -26,15 +25,16 @@ export class EmployeeTsoaController extends Controller {
    */
   @Get('/')
   public async getEmployees(
-    @Query() role?: 'ADMIN' | 'STAFF'
+    @Query() role?: ROLETYPE.MANAGER | ROLETYPE.STAFF,
+    @Query() isActive?: boolean,
   ): Promise<any> {
     const query: any = {};
     if (role) query.role = role;
+    if (isActive) query.isActive = isActive;
 
     const employees = await EmployeeService.getAll(query);
     return {
       status: 'success',
-      results: employees.length,
       data: { employees }
     };
   }
@@ -56,8 +56,8 @@ export class EmployeeTsoaController extends Controller {
    * Xem thông tin một nhân viên
    */
   @Get('{id}')
-  public async getEmployee(@Path() id: string): Promise<any> {
-    const employee = await EmployeeService.getOne({ _id: id });
+  public async getEmployee(@Path() id: string, @Query() hasUser?: boolean): Promise<any> {
+    const employee = await EmployeeService.getOne({ _id: id }, { hasUser });
     return {
       status: 'success',
       data: { employee }

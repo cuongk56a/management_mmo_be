@@ -5,6 +5,26 @@ import { TABLE_EMPLOYEE } from './employee.configs';
 import { paginate, toJSON } from '../../utils/plugins';
 import { TABLE_USER } from '../user/user.configs';
 
+
+export async function generateUniqueCode() {
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+
+  while (true) {
+    let CODE = '';
+
+    for (let i = 0; i < 9; i++) {
+      const randomIndex = Math.floor(Math.random() * characters.length);
+      CODE += characters[randomIndex];
+    }
+
+    const existing = await EmployeeModel.findOne({ CODE });
+
+    if (!existing) {
+      return CODE;
+    }
+  }
+}
+
 export interface IEmployeeModelDoc extends IEmployeeDoc { }
 interface IEmployeeModel extends IDocModel<IEmployeeModelDoc> { }
 
@@ -13,7 +33,7 @@ const employeeSchema = new mongoose.Schema<IEmployeeModelDoc>(
     CODE: {
       type: String,
       required: true,
-      unique: true
+      unique: true,
     },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -67,13 +87,21 @@ employeeSchema.virtual('user', {
 employeeSchema.plugin(toJSON);
 employeeSchema.plugin(paginate);
 
+employeeSchema.pre('validate', async function (next: any) {
+  if (!this.CODE) {
+    this.CODE = await generateUniqueCode();
+  }
+  next();
+});
+
 const populateArr = ({ hasUser }: { hasUser: boolean }) => {
   let pA: any[] = [];
   return pA
     .concat(
       !!hasUser
         ? {
-          path: 'user'
+          path: 'user',
+          select: 'username email phone avatar avatarUri'
         }
         : [],
     )
@@ -87,6 +115,7 @@ function preFind(next: any) {
 employeeSchema.pre('findOne', preFind);
 employeeSchema.pre('find', preFind);
 
+employeeSchema.index({ CODE: 1 });
 employeeSchema.index({ userId: 1 });
 employeeSchema.index({ role: 1 });
 employeeSchema.index({ commissionRate: 1 });

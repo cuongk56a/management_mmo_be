@@ -4,12 +4,10 @@ import ApiError from '../../utils/core/ApiError';
 import { catchAsync } from '../../utils/core/catchAsync';
 import { pick } from '../../utils/core/pick';
 import { EmployeeService } from './employee.service';
-import { getNewToken } from '../../config/passport';
 import { sendNoContent, sendOk } from '../../utils/core/response';
 
 const createOne = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     try {
-
         const data = await EmployeeService.createOne(req.body);
         if (!data) {
             throw new ApiError(httpStatus.NOT_FOUND, 'Not Found');
@@ -70,7 +68,7 @@ const getOne = catchAsync(async (req: Request, res: Response, next: NextFunction
 
 const getList = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const filter = pick(req.query, ['search', 'phone', 'email', 'isAdmin']);
-    const options = pick(req.query, ['hasAddress', 'hasOrganization', 'hasRole']);
+    const options = pick(req.query, ['hasUser']);
     const queryOptions = pick(req.query, ['sort', 'limit', 'page']);
     try {
         const data = await EmployeeService.getList(filter, { ...queryOptions, options });
@@ -82,7 +80,7 @@ const getList = catchAsync(async (req: Request, res: Response, next: NextFunctio
 
 const getAll = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const filter = pick(req.query, ['organizationIds', 'search', 'phone', 'email', 'isAdmin']);
-    const options = pick(req.query, ['hasAddress', 'hasOrganization', 'hasRole']);
+    const options = pick(req.query, ['hasUser']);
     try {
         const data = await EmployeeService.getAll(filter, options);
         return sendOk(res, data, 'OK');
