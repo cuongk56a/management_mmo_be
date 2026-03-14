@@ -3,6 +3,7 @@ import ApiError from '../../utils/core/ApiError';
 import httpStatus from 'http-status';
 import { IEmployeeDoc } from './employee.type';
 import { QueryOptions } from 'mongoose';
+import { UserModel } from '../user/user.model';
 
 export class EmployeeService {
   static async createOne(employeeBody: any) {
@@ -17,15 +18,30 @@ export class EmployeeService {
     return EmployeeModel.findOne(filter);
   }
 
-  static async getList(filter: any, options?: QueryOptions): Promise<IEmployeeDoc[]> {
-    return EmployeeModel.paginate(
-      {
-        ...filter,
-        deletedById: { $exists: false },
-      },
-      { sort: { createdAt: -1 }, ...options },
-    );
-  };
+  static async getList(filter: any, options?: QueryOptions) {
+
+    const query: any = {
+      deletedById: { $exists: false },
+    };
+
+    if (filter.role) query.role = filter.role;
+    if (filter.isActive !== undefined) query.isActive = filter.isActive;
+
+    if (filter['$text']?.$search) {
+      const keyword = filter['$text'].$search;
+
+      const users = await UserModel.find({
+        $text: { $search: keyword }
+      }).select('_id');
+
+      query.userId = { $in: users.map(u => u._id) };
+    }
+
+    return EmployeeModel.paginate(query, {
+      sort: { createdAt: -1 },
+      ...options
+    });
+  }
 
   static async getAll(filter: any, options?: QueryOptions) {
     return EmployeeModel.find({

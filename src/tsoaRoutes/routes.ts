@@ -905,6 +905,11 @@ export function RegisterRoutes(app: Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsEmployeeTsoaController_getEmployees: Record<string, TsoaRoute.ParameterSchema> = {
+                sort: {"in":"query","name":"sort","dataType":"string"},
+                limit: {"default":10,"in":"query","name":"limit","dataType":"double"},
+                page: {"default":1,"in":"query","name":"page","dataType":"double"},
+                search: {"in":"query","name":"search","dataType":"string"},
+                hasUser: {"in":"query","name":"hasUser","dataType":"boolean"},
                 role: {"in":"query","name":"role","dataType":"union","subSchemas":[{"ref":"ROLETYPE.MANAGER"},{"ref":"ROLETYPE.STAFF"}]},
                 isActive: {"in":"query","name":"isActive","dataType":"boolean"},
         };
@@ -969,6 +974,7 @@ export function RegisterRoutes(app: Router) {
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsEmployeeTsoaController_getEmployee: Record<string, TsoaRoute.ParameterSchema> = {
                 id: {"in":"path","name":"id","required":true,"dataType":"string"},
+                hasUser: {"in":"query","name":"hasUser","dataType":"boolean"},
         };
         app.get('/v1/employees/:id',
             authenticateMiddleware([{"jwt":["ADMIN"]}]),

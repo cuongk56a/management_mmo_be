@@ -92,9 +92,7 @@ function preFind(next: any) {
 userSchema.pre('findOne', preFind);
 userSchema.pre('find', preFind);
 
-// userSchema.index({ phone: 1 });
-// userSchema.index({ email: 1 });
-userSchema.index({ fullName: 'text' });
+userSchema.index({ fullName: 'text', email: 'text', phone: 'text' });
 
 /**
  * @typedef User

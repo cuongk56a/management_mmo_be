@@ -36,6 +36,8 @@ const getOne = {
 const getList = {
   query: Joi.object().keys({
     search: Joi.string().empty(''),
+    isActive: Joi.boolean(),
+    role: Joi.string().valid(...Object.values(ROLETYPE)),
     hasUser: Joi.boolean(),
     ...customValidations.paginateValidation,
   }),
@@ -45,6 +47,8 @@ const getList = {
 const getAll = {
   query: Joi.object().keys({
     search: Joi.string().empty(''),
+    isActive: Joi.boolean(),
+    role: Joi.string().valid(...Object.values(ROLETYPE)),
     hasUser: Joi.boolean(),
   }),
 };

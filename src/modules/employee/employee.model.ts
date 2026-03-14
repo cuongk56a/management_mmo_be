@@ -115,7 +115,6 @@ function preFind(next: any) {
 employeeSchema.pre('findOne', preFind);
 employeeSchema.pre('find', preFind);
 
-employeeSchema.index({ CODE: 1 });
 employeeSchema.index({ userId: 1 });
 employeeSchema.index({ role: 1 });
 employeeSchema.index({ commissionRate: 1 });

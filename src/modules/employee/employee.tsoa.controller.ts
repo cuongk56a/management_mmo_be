@@ -1,6 +1,8 @@
 import { Controller, Get, Post, Put, Delete, Route, Body, Query, Path, Tags, Security } from 'tsoa';
 import { EmployeeService } from './employee.service';
 import { ROLETYPE } from './employee.type';
+import { query } from 'express';
+import { UserModel } from '../user/user.model';
 
 interface EmployeeCreateBody {
   userId: string;
@@ -15,6 +17,15 @@ interface EmployeeUpdateBody {
   isActive?: boolean;
 }
 
+interface EmployeeGetListQuery {
+  role?: ROLETYPE.MANAGER | ROLETYPE.STAFF;
+  isActive?: boolean;
+  search?: string;
+  hasUser?: boolean;
+  page?: number;
+  limit?: number;
+}
+
 @Route('employees')
 @Tags('Employees')
 @Security('jwt', ['ADMIN'])
@@ -25,14 +36,30 @@ export class EmployeeTsoaController extends Controller {
    */
   @Get('/')
   public async getEmployees(
+    @Query() sort?: string,
+    @Query() limit: number = 10,
+    @Query() page: number = 1,
+    @Query() search?: string,
+    @Query() hasUser?: boolean,
     @Query() role?: ROLETYPE.MANAGER | ROLETYPE.STAFF,
     @Query() isActive?: boolean,
   ): Promise<any> {
-    const query: any = {};
-    if (role) query.role = role;
-    if (isActive) query.isActive = isActive;
+    const query: any = {
+      deletedById: { $exists: false },
+    };
 
-    const employees = await EmployeeService.getAll(query);
+    if (role) query.role = role;
+    if (isActive !== undefined) query.isActive = isActive;
+
+    if (search) {
+      const users = await UserModel.find({
+        $text: { $search: search }
+      }).select('_id');
+
+      query.userId = { $in: users.map(u => u._id) };
+    }
+
+    const employees = await EmployeeService.getList(query);
     return {
       status: 'success',
       data: { employees }
